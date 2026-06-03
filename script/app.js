@@ -1,50 +1,79 @@
-// HTML Elementen selecteren
 const healthForm = document.getElementById('health-form');
 const logList = document.getElementById('log-list');
 const btnReset = document.getElementById('btn-reset');
 const aiAdvice = document.getElementById('ai-advice');
+const statKcal = document.getElementById('stat-kcal');
+const filterButtons = document.querySelectorAll('.filter-btn');
 
-// 1. Data ophalen uit LocalStorage (of lege array als er nog niks is)
 let logs = JSON.parse(localStorage.getItem('gymLogs')) || [];
+let activeFilter = 'day';
 
-// 2. Functie om de opgeslagen logs op het scherm te tonen (Read)
+// Filter logica
+function isInPeriod(logDateStr, period) {
+    const logDate = new Date(logDateStr);
+    const today = new Date();
+    
+    // Reset uren voor accurate dag-berekening
+    today.setHours(0,0,0,0);
+    logDate.setHours(0,0,0,0);
+    
+    const diffTime = today - logDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (period === 'day') return diffDays === 0;
+    if (period === 'week') return diffDays >= 0 && diffDays <= 7;
+    if (period === 'month') return diffDays >= 0 && diffDays <= 30;
+    return true;
+}
+
+// Scherm renderen (Read)
 function renderLogs() {
     logList.innerHTML = '';
     
-    if (logs.length === 0) {
-        logList.innerHTML = '<p>Nog geen gegevens ingevoerd voor deze periode.</p>';
-        aiAdvice.innerText = 'Voer je eerste training in voor persoonlijk advies!';
+    // Filter de logs op basis van gekozen periode
+    const filteredLogs = logs.filter(log => isInPeriod(log.date, activeFilter));
+
+    // Update KCAL Teller voor geselecteerde periode
+    const totaalKcal = filteredLogs
+        .filter(log => log.category === 'Voeding')
+        .reduce((sum, log) => sum + Number(log.amount), 0);
+    statKcal.innerText = totaalKcal;
+
+    if (filteredLogs.length === 0) {
+        logList.innerHTML = '<p style="color:#8e8e93; font-size:0.9rem;">Geen logs gevonden voor deze periode.</p>';
+        aiAdvice.innerText = 'Voer gegevens in voor deze periode voor AI hersteladvies.';
         return;
     }
 
-    // Toon elk item in de lijst
-    logs.forEach(log => {
+    // Bouw de lijst items
+    filteredLogs.forEach(log => {
         const div = document.createElement('div');
-        div.style.borderBottom = '1px solid #29292e';
-        div.style.padding = '10px 0';
+        div.className = 'log-item';
         div.innerHTML = `
-            <strong>${log.date}</strong> - [${log.category}] 
-            ${log.description}: ${log.amount} ${log.unit} (${log.intensity})
+            <div>
+                <span style="font-weight:700; color:#ccff00;">${log.description}</span>
+                <p style="font-size:0.75rem; color:#8e8e93;">${log.date} • ${log.category}</p>
+            </div>
+            <span style="font-weight:700;">${log.amount} ${log.unit}</span>
         `;
         logList.appendChild(div);
     });
 
-    // Offline AI Coach Logica: reageert op het laatst ingevoerde item
-    const lastLog = logs[logs.length - 1];
+    // AI Coach advies op basis van laatste actie
+    const lastLog = filteredLogs[filteredLogs.length - 1];
     if (lastLog.intensity === 'Zwaar') {
-        aiAdvice.innerText = `🤖 AI Coach: Je laatste training (${lastLog.description}) was zwaar. Focus vandaag op extra eiwitten en pak voldoende rust!`;
+        aiAdvice.innerText = `🤖 AI Coach: Je workout (${lastLog.description}) was intensief. Zorg voor direct spierherstel: pak extra eiwitten en pak minimaal 8 uur slaap!`;
     } else {
-        aiAdvice.innerText = `🤖 AI Coach: Lekker bezig! Consistentie is key. Blijf je logs bijhouden om progressie te zien.`;
+        aiAdvice.innerText = `🤖 AI Coach: Goed ritme! Invoer verwerkt. Blijf progressief laden (progressive overload) om sterker te worden.`;
     }
 }
 
-// 3. Luisteren naar het formulier (Create)
+// Opslaan (Create)
 healthForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Nieuw log-object aanmaken op basis van invoervelden
     const newLog = {
-        id: Date.now(), // Unieke timestamp
+        id: Date.now(),
         date: document.getElementById('input-date').value,
         category: document.getElementById('input-category').value,
         description: document.getElementById('input-desc').value,
@@ -53,16 +82,23 @@ healthForm.addEventListener('submit', function(e) {
         intensity: document.getElementById('input-intensity').value
     };
 
-    // Toevoegen aan array en opslaan in LocalStorage
     logs.push(newLog);
     localStorage.setItem('gymLogs', JSON.stringify(logs));
-
-    // Formulier leegmaken en scherm updaten
     healthForm.reset();
     renderLogs();
 });
 
-// 4. Reset knop functionaliteit (Delete)
+// Event listeners voor Dag / Week / Maand knoppen
+filterButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        activeFilter = this.getAttribute('data-filter');
+        renderLogs();
+    });
+});
+
+// Volledige Reset (Delete)
 btnReset.addEventListener('click', function() {
     if (confirm('Weet je zeker dat je alle gym-data wilt wissen?')) {
         logs = [];
@@ -71,11 +107,5 @@ btnReset.addEventListener('click', function() {
     }
 });
 
-// Starten bij laden van de pagina
+// Start de app
 renderLogs();
-// Bereken totale calorieën van vandaag voor het gifgroene vakje
-const totaalKcal = logs
-    .filter(log => log.category === 'Voeding')
-    .reduce((sum, log) => sum + Number(log.amount), 0);
-
-document.getElementById('stat-kcal').innerText = totaalKcal;

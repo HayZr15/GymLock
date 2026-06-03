@@ -2,11 +2,11 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: '-apple-system', BlinkMacSystemFont, sans-serif;
 }
 
 body {
-    background-color: #1c1c1e; /* Iets zachter premium donkergrijs */
+    background-color: #0a0a0c;
     color: #ffffff;
     padding: 20px;
     display: flex;
@@ -19,35 +19,46 @@ header {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 15px;
-    border-bottom: 1px solid #2c2c2e;
+    border-bottom: 1px solid #1c1c1e;
 }
 
 header h1 {
-    font-size: 1.3rem;
-    color: #e5e5ea;
+    font-size: 1.4rem;
+    color: #ccff00;
 }
 
-/* 1. User Profile header van het screenshot */
+header nav button {
+    background: #1c1c1e;
+    color: white;
+    border: 1px solid #2c2c2e;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* User profile block */
 .user-profile {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin: 20px 0;
+    margin-bottom: 20px;
 }
 
 .avatar {
     width: 45px;
     height: 45px;
-    background: #2c2c2e;
+    background: #1c1c1e;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    border: 1px solid #2c2c2e;
 }
 
 .welcome-text {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #8e8e93;
     text-transform: uppercase;
     display: block;
@@ -58,7 +69,7 @@ header h1 {
     font-weight: 700;
 }
 
-/* 2. De 3 Mini Stats Grid */
+/* Dashboard Stats Grid */
 .mini-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -67,60 +78,57 @@ header h1 {
 }
 
 .stat-card {
-    background: #2c2c2e;
-    padding: 12px 8px;
+    background: #1c1c1e;
+    padding: 15px 10px;
     border-radius: 12px;
     text-align: center;
+    border: 1px solid #2c2c2e;
 }
 
 .stat-card h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 4px 0 2px 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 4px 0;
 }
 
 .stat-card p {
     font-size: 0.6rem;
     color: #8e8e93;
-    font-weight: 600;
+    font-weight: 700;
 }
 
-.stat-icon {
-    font-size: 1.1rem;
-}
-
-/* De gifgroene highlight kleur uit jouw screenshot */
 .stat-card.highlight {
     background: #ccff00; 
     color: #000000;
+    border: none;
 }
 
 .stat-card.highlight p {
-    color: #3a3a3c;
+    color: #1c1c1e;
 }
 
-/* 3. AI Coach Widget */
+/* AI Coach Card Box */
 #ai-coach-box {
-    background: #2c2c2e;
+    background: #1c1c1e;
     padding: 15px;
-    border-radius: 16px;
+    border-radius: 12px;
     margin-bottom: 20px;
-    border: 1px solid #3a3a3c;
+    border: 1px solid #2c2c2e;
 }
 
 #ai-coach-box h3 {
-    color: #ccff00; /* Gifgroen accent */
-    font-size: 1rem;
-    margin-bottom: 4px;
+    color: #ccff00;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
 }
 
 #ai-advice {
-    color: #d1d1d6;
+    color: #e5e5ea;
     font-size: 0.85rem;
-    line-height: 1.3;
+    line-height: 1.4;
 }
 
-/* Filters & Knoppen */
+/* Period Filter Buttons */
 .filters {
     display: flex;
     gap: 8px;
@@ -129,69 +137,133 @@ header h1 {
 
 .filters button {
     flex: 1;
-    background: #2c2c2e;
+    background: #1c1c1e;
     color: #aeaeb2;
-    border: none;
-    padding: 8px;
-    border-radius: 20px; /* Ronde knoppen zoals screenshot */
+    border: 1px solid #2c2c2e;
+    padding: 10px;
+    border-radius: 25px;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
+    transition: 0.2s;
 }
 
-.filters button.active {
+.filters button.active, .filters button:hover {
     background: #ccff00;
     color: #000000;
+    border-color: #ccff00;
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+    color: #e5e5ea;
 }
 
 #log-list {
-    background: #2c2c2e;
+    background: #1c1c1e;
     padding: 15px;
-    border-radius: 16px;
+    border-radius: 12px;
+    border: 1px solid #2c2c2e;
 }
 
-/* Formulier */
+.log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #2c2c2e;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+/* Forms and Inputs */
 form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    background: #2c2c2e;
+    gap: 10px;
+    background: #1c1c1e;
     padding: 20px;
-    border-radius: 16px;
-    margin-top: 20px;
+    border-radius: 12px;
+    border: 1px solid #2c2c2e;
+    margin-bottom: 20px;
 }
 
 form label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #8e8e93;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 form input, form select {
-    background: #1c1c1e;
+    background: #0a0a0c;
     color: white;
-    border: 1px solid #3a3a3c;
+    border: 1px solid #2c2c2e;
     padding: 12px;
     border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+form input:focus, form select:focus {
+    border-color: #ccff00;
+    outline: none;
 }
 
 #btn-save {
     background: #ccff00;
     color: #000000;
     border: none;
-    padding: 12px;
+    padding: 14px;
     border-radius: 25px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-top: 10px;
 }
 
-/* Desktop indeling naast elkaar */
+/* Settings Area */
+.settings-card {
+    background: #1c1c1e;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #2c2c2e;
+}
+
+.settings-card p {
+    font-size: 0.9rem;
+    color: #aeaeb2;
+    margin-bottom: 12px;
+}
+
+#btn-reset {
+    background: #ff3b30;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+}
+
+footer {
+    text-align: center;
+    color: #48484a;
+    font-size: 0.75rem;
+    margin-top: auto;
+    padding-top: 30px;
+}
+
+/* RESPONSIVE LAYOUT MATRIX (F9) */
 @media (min-width: 768px) {
-    main {
+    .app-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 25px;
+        margin-top: 20px;
     }
 }
