@@ -122,3 +122,6 @@ btnReset.addEventListener('click', function() {
 });
 
 renderLogs();
+// AI Coach advies op basis van laatste actie via onze externe kennisbank
+const lastLog = filteredLogs[filteredLogs.length - 1];
+aiAdvice.innerText = getSmartAdvice(lastLog.category, lastLog.intensity);
