@@ -4,16 +4,28 @@ const btnReset = document.getElementById('btn-reset');
 const aiAdvice = document.getElementById('ai-advice');
 const statKcal = document.getElementById('stat-kcal');
 const filterButtons = document.querySelectorAll('.filter-btn');
+const navButtons = document.querySelectorAll('.nav-btn');
+const appScreens = document.querySelectorAll('.app-screen');
 
 let logs = JSON.parse(localStorage.getItem('gymLogs')) || [];
 let activeFilter = 'day';
 
-// Filter logica
+// MENU SCHERMEN SWITCH LOGICA
+navButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+        navButtons.forEach(b => b.classList.remove('active'));
+        appScreens.forEach(s => s.classList.remove('active'));
+        
+        this.classList.add('active');
+        const targetScreen = this.getAttribute('data-target');
+        document.getElementById(targetScreen).classList.add('active');
+    });
+});
+
+// Filter berekening op datum
 function isInPeriod(logDateStr, period) {
     const logDate = new Date(logDateStr);
     const today = new Date();
-    
-    // Reset uren voor accurate dag-berekening
     today.setHours(0,0,0,0);
     logDate.setHours(0,0,0,0);
     
@@ -26,14 +38,11 @@ function isInPeriod(logDateStr, period) {
     return true;
 }
 
-// Scherm renderen (Read)
+// Data tonen (Read)
 function renderLogs() {
     logList.innerHTML = '';
-    
-    // Filter de logs op basis van gekozen periode
     const filteredLogs = logs.filter(log => isInPeriod(log.date, activeFilter));
 
-    // Update KCAL Teller voor geselecteerde periode
     const totaalKcal = filteredLogs
         .filter(log => log.category === 'Voeding')
         .reduce((sum, log) => sum + Number(log.amount), 0);
@@ -45,10 +54,13 @@ function renderLogs() {
         return;
     }
 
-    // Bouw de lijst items
     filteredLogs.forEach(log => {
         const div = document.createElement('div');
         div.className = 'log-item';
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.padding = '12px 0';
+        div.style.borderBottom = '1px solid #2c2c2e';
         div.innerHTML = `
             <div>
                 <span style="font-weight:700; color:#ccff00;">${log.description}</span>
@@ -59,12 +71,11 @@ function renderLogs() {
         logList.appendChild(div);
     });
 
-    // AI Coach advies op basis van laatste actie
     const lastLog = filteredLogs[filteredLogs.length - 1];
     if (lastLog.intensity === 'Zwaar') {
         aiAdvice.innerText = `🤖 AI Coach: Je workout (${lastLog.description}) was intensief. Zorg voor direct spierherstel: pak extra eiwitten en pak minimaal 8 uur slaap!`;
     } else {
-        aiAdvice.innerText = `🤖 AI Coach: Goed ritme! Invoer verwerkt. Blijf progressief laden (progressive overload) om sterker te worden.`;
+        aiAdvice.innerText = `🤖 AI Coach: Goed ritme! Invoer verwerkt. Blijf progressief laden om sterker te worden.`;
     }
 }
 
@@ -86,9 +97,12 @@ healthForm.addEventListener('submit', function(e) {
     localStorage.setItem('gymLogs', JSON.stringify(logs));
     healthForm.reset();
     renderLogs();
+    
+    // Na opslaan springt de app automatisch terug naar het Dashboard om je log te zien!
+    document.querySelector('[data-target="screen-dashboard"]').click();
 });
 
-// Event listeners voor Dag / Week / Maand knoppen
+// Dashboard filters (Dag/Week/Maand)
 filterButtons.forEach(btn => {
     btn.addEventListener('click', function() {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -98,7 +112,7 @@ filterButtons.forEach(btn => {
     });
 });
 
-// Volledige Reset (Delete)
+// Reset database
 btnReset.addEventListener('click', function() {
     if (confirm('Weet je zeker dat je alle gym-data wilt wissen?')) {
         logs = [];
@@ -107,5 +121,4 @@ btnReset.addEventListener('click', function() {
     }
 });
 
-// Start de app
 renderLogs();
