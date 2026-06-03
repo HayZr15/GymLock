@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymProgress PWA</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <header>
+        <h1>💪 GymProgress</h1>
+        <nav>
+            <button id="btn-lang-nl">NL</button>
+            <button id="btn-lang-en">EN</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="dashboard-section">
+            <h2 class="txt-dashboard">Mijn Dashboard</h2>
+            
+            <div id="ai-coach-box" style="background: #eef; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h3>🤖 Offline AI Coach</h3>
+                <p id="ai-advice">Voer je eerste training in voor persoonlijk advies!</p>
+            </div>
+
+            <div class="filters">
+                <button id="filter-day" class="active">Dag</button>
+                <button id="filter-week">Week</button>
+                <button id="filter-month">Maand</button>
+            </div>
+
+            <div id="log-list">
+                <p>Nog geen gegevens ingevoerd voor deze periode.</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="input-section">
+            <h2 class="txt-add-log">Nieuwe Log Toevoegen</h2>
+            <form id="health-form">
+                
+                <label for="input-date" class="txt-label-date">Datum:</label>
+                <input type="date" id="input-date" required>
+
+                <label for="input-category" class="txt-label-category">Categorie:</label>
+                <select id="input-category" required>
+                    <option value="Krachttraining">Krachttraining (Gym)</option>
+                    <option value="Cardio">Cardio / Conditie</option>
+                    <option value="Voeding">Voeding / Kcal</option>
+                </select>
+
+                <label for="input-desc" class="txt-label-desc">Omschrijving:</label>
+                <input type="text" id="input-desc" placeholder="Bijv. Bench Press of Proteïneshake" required>
+
+                <label for="input-amount" class="txt-label-amount">Aantal / Gewicht / Kcal:</label>
+                <input type="number" id="input-amount" placeholder="Bijv. 80 of 400" required>
+
+                <label for="input-unit" class="txt-label-unit">Eenheid:</label>
+                <select id="input-unit" required>
+                    <option value="kg">kg (Gewicht)</option>
+                    <option value="min">min (Duur)</option>
+                    <option value="kcal">kcal (Calorieën)</option>
+                </select>
+
+                <label for="input-intensity" class="txt-label-intensity">Hoe zwaar was het? (Voor AI Coach):</label>
+                <select id="input-intensity">
+                    <option value="Licht">Licht</option>
+                    <option value="Gemiddeld">Gemiddeld</option>
+                    <option value="Zwaar">Zwaar</option>
+                </select>
+
+                <button type="submit" id="btn-save">Opslaan</button>
+            </form>
+        </section>
+
+        <hr>
+
+        <section id="settings-section">
+            <h2 class="txt-settings">Instellingen</h2>
+            <p>Wil je alle opgeslagen gegevens wissen en opnieuw beginnen?</p>
+            <button id="btn-reset" style="background-color: red; color: white;">Reset Alle Gegevens</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 - GymProgress PWA</p>
+    </footer>
+
+    <script src="script/app.js"></script>
+</body>
+</html>
