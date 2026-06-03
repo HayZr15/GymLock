@@ -6,6 +6,20 @@
     <title>GymProgress PWA</title>
     <link rel="stylesheet" href="styles/style.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <style>
+        #ai-coach-box {
+            background: #eef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn-reset {
+            background-color: red;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
@@ -21,7 +35,7 @@
         <section id="dashboard-section">
             <h2 class="txt-dashboard">Mijn Dashboard</h2>
             
-            <div id="ai-coach-box" style="background: #eef; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div id="ai-coach-box">
                 <h3>🤖 Offline AI Coach</h3>
                 <p id="ai-advice">Voer je eerste training in voor persoonlijk advies!</p>
             </div>
@@ -82,7 +96,7 @@
         <section id="settings-section">
             <h2 class="txt-settings">Instellingen</h2>
             <p>Wil je alle opgeslagen gegevens wissen en opnieuw beginnen?</p>
-            <button id="btn-reset" style="background-color: red; color: white;">Reset Alle Gegevens</button>
+            <button id="btn-reset" type="button" class="btn-reset">Reset Alle Gegevens</button>
         </section>
     </main>
 
