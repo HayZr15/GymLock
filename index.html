@@ -96,23 +96,34 @@
             </form>
         </section>
 
-        <section id="screen-settings" class="app-screen">
-            <h2>Instellingen</h2>
+<section id="screen-settings" class="app-screen">
+        <h2>Instellingen</h2>
+        
+        <div class="settings-card">
+            <h3>Mijn Profiel</h3>
+            <label for="profile-height">Lengte (in cm):</label>
+            <input type="number" id="profile-height" placeholder="Bijv. 180" class="profile-input">
             
-            <div class="settings-card">
-                <h3>Taal / Language</h3>
-                <div class="lang-buttons">
-                    <button id="btn-lang-nl" class="active">NL</button>
-                    <button id="btn-lang-en">EN</button>
-                </div>
-            </div>
+            <label for="profile-weight">Gewicht (in kg):</label>
+            <input type="number" id="profile-weight" placeholder="Bijv. 80" class="profile-input">
+            
+            <button id="btn-save-profile" class="btn-profile-save">Profiel Opslaan</button>
+        </div>
 
-            <div class="settings-card">
-                <h3>Data Beheer</h3>
-                <p>Wil je alle opgeslagen gegevens wissen?</p>
-                <button id="btn-reset">Reset Alle Gegevens</button>
+        <div class="settings-card">
+            <h3>Taal / Language</h3>
+            <div class="lang-buttons">
+                <button id="btn-lang-nl" class="active">NL</button>
+                <button id="btn-lang-en">EN</button>
             </div>
-        </section>
+        </div>
+
+        <div class="settings-card">
+            <h3>Data Beheer</h3>
+            <p>Wil je alle opgeslagen gegevens wissen?</p>
+            <button id="btn-reset">Reset Alle Gegevens</button>
+        </div>
+    </section>
     </main>
 
     <nav class="bottom-nav">
@@ -130,7 +141,6 @@
         </button>
     </nav>
 
-    <script src="script/ai-coach.js"></script>
     <script src="script/app.js"></script>
 </body>
 </html>

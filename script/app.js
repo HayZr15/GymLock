@@ -7,38 +7,44 @@ const filterButtons = document.querySelectorAll('.filter-btn');
 const navButtons = document.querySelectorAll('.nav-btn');
 const appScreens = document.querySelectorAll('.app-screen');
 
+// Profiel elementen
+const inputHeight = document.getElementById('profile-height');
+const inputWeight = document.getElementById('profile-weight');
+const btnSaveProfile = document.getElementById('btn-save-profile');
+
 let logs = JSON.parse(localStorage.getItem('gymLogs')) || [];
+let profile = JSON.parse(localStorage.getItem('gymProfile')) || null;
 let activeFilter = 'day';
 
-// MENU SCHERMEN SWITCH LOGICA
+// Inladen van profieldata in de inputvelden als het bestaat
+if (profile) {
+    inputHeight.value = profile.height;
+    inputWeight.value = profile.weight;
+}
+
+// Menu Schakelen
 navButtons.forEach(btn => {
     btn.addEventListener('click', function() {
         navButtons.forEach(b => b.classList.remove('active'));
         appScreens.forEach(s => s.classList.remove('active'));
-        
         this.classList.add('active');
-        const targetScreen = this.getAttribute('data-target');
-        document.getElementById(targetScreen).classList.add('active');
+        document.getElementById(this.getAttribute('data-target')).classList.add('active');
     });
 });
 
-// Filter berekening op datum
+// Datum filter check
 function isInPeriod(logDateStr, period) {
     const logDate = new Date(logDateStr);
     const today = new Date();
-    today.setHours(0,0,0,0);
-    logDate.setHours(0,0,0,0);
-    
-    const diffTime = today - logDate;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+    today.setHours(0,0,0,0); logDate.setHours(0,0,0,0);
+    const diffDays = Math.ceil((today - logDate) / (1000 * 60 * 60 * 24));
     if (period === 'day') return diffDays === 0;
     if (period === 'week') return diffDays >= 0 && diffDays <= 7;
     if (period === 'month') return diffDays >= 0 && diffDays <= 30;
     return true;
 }
 
-// Data tonen (Read)
+// Scherm updaten (Read)
 function renderLogs() {
     logList.innerHTML = '';
     const filteredLogs = logs.filter(log => isInPeriod(log.date, activeFilter));
@@ -48,19 +54,19 @@ function renderLogs() {
         .reduce((sum, log) => sum + Number(log.amount), 0);
     statKcal.innerText = totaalKcal;
 
+    // AI aanroepen met zowel de laatste log als de profielcijfers
+    const lastLog = filteredLogs[filteredLogs.length - 1];
+    aiAdvice.innerHTML = getSmartAdvice(lastLog, profile);
+
     if (filteredLogs.length === 0) {
         logList.innerHTML = '<p style="color:#8e8e93; font-size:0.9rem;">Geen logs gevonden voor deze periode.</p>';
-        aiAdvice.innerText = 'Voer gegevens in voor deze periode voor AI hersteladvies.';
         return;
     }
 
     filteredLogs.forEach(log => {
         const div = document.createElement('div');
         div.className = 'log-item';
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.padding = '12px 0';
-        div.style.borderBottom = '1px solid #2c2c2e';
+        div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.padding = '12px 0'; div.style.borderBottom = '1px solid #2c2c2e';
         div.innerHTML = `
             <div>
                 <span style="font-weight:700; color:#ccff00;">${log.description}</span>
@@ -70,19 +76,11 @@ function renderLogs() {
         `;
         logList.appendChild(div);
     });
-
-    const lastLog = filteredLogs[filteredLogs.length - 1];
-    if (lastLog.intensity === 'Zwaar') {
-        aiAdvice.innerText = `🤖 AI Coach: Je workout (${lastLog.description}) was intensief. Zorg voor direct spierherstel: pak extra eiwitten en pak minimaal 8 uur slaap!`;
-    } else {
-        aiAdvice.innerText = `🤖 AI Coach: Goed ritme! Invoer verwerkt. Blijf progressief laden om sterker te worden.`;
-    }
 }
 
-// Opslaan (Create)
+// Log Opslaan (Create)
 healthForm.addEventListener('submit', function(e) {
     e.preventDefault();
-
     const newLog = {
         id: Date.now(),
         date: document.getElementById('input-date').value,
@@ -92,17 +90,26 @@ healthForm.addEventListener('submit', function(e) {
         unit: document.getElementById('input-unit').value,
         intensity: document.getElementById('input-intensity').value
     };
-
     logs.push(newLog);
     localStorage.setItem('gymLogs', JSON.stringify(logs));
     healthForm.reset();
     renderLogs();
-    
-    // Na opslaan springt de app automatisch terug naar het Dashboard om je log te zien!
     document.querySelector('[data-target="screen-dashboard"]').click();
 });
 
-// Dashboard filters (Dag/Week/Maand)
+// Profiel Opslaan
+btnSaveProfile.addEventListener('click', function() {
+    profile = {
+        height: inputHeight.value,
+        weight: inputWeight.value
+    };
+    localStorage.setItem('gymProfile', JSON.stringify(profile));
+    alert('Profiel succesvol bijgewerkt!');
+    renderLogs();
+    document.querySelector('[data-target="screen-dashboard"]').click(); // Terug naar dashboard
+});
+
+// Dashboard periode filters
 filterButtons.forEach(btn => {
     btn.addEventListener('click', function() {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -115,13 +122,12 @@ filterButtons.forEach(btn => {
 // Reset database
 btnReset.addEventListener('click', function() {
     if (confirm('Weet je zeker dat je alle gym-data wilt wissen?')) {
-        logs = [];
+        logs = []; profile = null;
         localStorage.removeItem('gymLogs');
+        localStorage.removeItem('gymProfile');
+        inputHeight.value = ''; inputWeight.value = '';
         renderLogs();
     }
 });
 
 renderLogs();
-// AI Coach advies op basis van laatste actie via onze externe kennisbank
-const lastLog = filteredLogs[filteredLogs.length - 1];
-aiAdvice.innerText = getSmartAdvice(lastLog.category, lastLog.intensity);
