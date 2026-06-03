@@ -73,3 +73,9 @@ btnReset.addEventListener('click', function() {
 
 // Starten bij laden van de pagina
 renderLogs();
+// Bereken totale calorieën van vandaag voor het gifgroene vakje
+const totaalKcal = logs
+    .filter(log => log.category === 'Voeding')
+    .reduce((sum, log) => sum + Number(log.amount), 0);
+
+document.getElementById('stat-kcal').innerText = totaalKcal;

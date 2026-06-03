@@ -32,24 +32,49 @@
     </header>
 
     <main>
-        <section id="dashboard-section">
-            <h2 class="txt-dashboard">Mijn Dashboard</h2>
-            
-            <div id="ai-coach-box">
-                <h3>🤖 Offline AI Coach</h3>
-                <p id="ai-advice">Voer je eerste training in voor persoonlijk advies!</p>
-            </div>
+<section id="dashboard-section">
+    <div class="user-profile">
+        <div class="avatar">💪</div>
+        <div>
+            <span class="welcome-text">Welkom terug,</span>
+            <h3 class="user-name">Gym Bro</h3>
+        </div>
+    </div>
+    
+    <div class="mini-stats">
+        <div class="stat-card">
+            <span class="stat-icon">👣</span>
+            <h4>6.359</h4>
+            <p>STEPS</p>
+        </div>
+        <div class="stat-card highlight">
+            <span class="stat-icon">🔥</span>
+            <h4 id="stat-kcal">0</h4>
+            <p>KCAL BURN</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">❤️</span>
+            <h4>123</h4>
+            <p>BPM</p>
+        </div>
+    </div>
 
-            <div class="filters">
-                <button id="filter-day" class="active">Dag</button>
-                <button id="filter-week">Week</button>
-                <button id="filter-month">Maand</button>
-            </div>
+    <div id="ai-coach-box">
+        <h3>🤖 Offline AI Coach</h3>
+        <p id="ai-advice">Voer je eerste training in voor persoonlijk advies!</p>
+    </div>
 
-            <div id="log-list">
-                <p>Nog geen gegevens ingevoerd voor deze periode.</p>
-            </div>
-        </section>
+    <div class="filters">
+        <button id="filter-day" class="active">Dag</button>
+        <button id="filter-week">Week</button>
+        <button id="filter-month">Maand</button>
+    </div>
+
+    <h2>Gezondheidslogs</h2>
+    <div id="log-list">
+        <p>Nog geen gegevens ingevoerd voor deze periode.</p>
+    </div>
+</section>
 
         <hr>
 
