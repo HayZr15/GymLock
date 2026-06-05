@@ -1,16 +1,16 @@
 const aiTemplates = {
     Krachttraining: {
-        Zwaar: "Zware sessie. Richting volgende week is je Progressive Overload doel voor **DESC**: **TARGET**.",
-        Gemiddeld: "Goede prikkel op **DESC**. Probeer dit volume minimaal 2 weken vast te houden voor hypertrofie.",
-        Licht: "Actief herstel. Ideale sessie om puur op de techniek en ROM van je **DESC** te focussen."
+        Zwaar: "Zware sessie. Richting volgende week is je Progressive Overload doel voor <b>DESC</b>: <b>TARGET</b>.",
+        Gemiddeld: "Goede prikkel op <b>DESC</b>. Probeer dit volume minimaal 2 weken vast te houden voor hypertrofie.",
+        Licht: "Actief herstel. Ideale sessie om puur op de techniek en ROM van je <b>DESC</b> te focussen."
     },
     Cardio: {
-        Zwaar: "Intense cardiosessie (**AMOUNT** **UNIT**). Je hebt je glycogeenvoorraden uitgeput. Hersteltijd: 24-36 uur.",
+        Zwaar: "Intense cardiosessie (<b>AMOUNT</b> <b>UNIT</b>). Je hebt je glycogeenvoorraden uitgeput. Hersteltijd: 24-36 uur.",
         Gemiddeld: "Keurige Zone-2 conditietraining. Dit vergroot je cardiovasculaire netwerk.",
         Licht: "Lichte cardio stimuleert de bloedsomloop en versnelt het spierherstel."
     },
     Voeding: {
-        Zwaar: "Grote maaltijd gelogd van **AMOUNT** kcal. Richtlijn voor je macro-verdeling: **MACROS**.",
+        Zwaar: "Grote maaltijd gelogd van <b>AMOUNT</b> kcal. Richtlijn voor je macro-verdeling: <b>MACROS</b>.",
         Gemiddeld: "Gebalanceerde maaltijd. Zorg voor een stabiele verdeling van je eiwitten over de dag.",
         Licht: "Lichte maaltijd/snack. Let op dat je aan het einde van de dag wel aan je totale eiwitdoel komt."
     }
@@ -30,18 +30,18 @@ function getSmartAdvice(log, profile) {
         else if (bmi >= 25 && bmi < 30) bmiStatus = "Overgewicht";
         else if (bmi >= 30) bmiStatus = "Obesitas / Heavy Bulk";
 
-        profileAnalysis = `📊 **Profiel**: BMI: ${bmi} (${bmiStatus}) • 💧 **Hydro Doel**: ${waterTarget}L water/dag.<br><br>`;
+        profileAnalysis = `📊 <b>Profiel</b>: BMI: ${bmi} (${bmiStatus}) • 💧 <b>Hydro Doel</b>: ${waterTarget}L water/dag.<br><br>`;
     } else {
         profileAnalysis = `💡 *Tip: Vul je profiel in bij 'Opties' voor BMI & Water doelen.*<br><br>`;
     }
 
     if (!log) {
-        return `🤖 **AI Coach**<br>${profileAnalysis}Voer een log in voor een actuele workout of macro-analyse.`;
+        return `🤖 <b>AI Coach</b><br>${profileAnalysis}Voer een log in voor een actuele workout of macro-analyse.`;
     }
 
     const { category, intensity, description, amount, unit } = log;
     if (!aiTemplates[category] || !aiTemplates[category][intensity]) {
-        return `🤖 **AI Coach**<br>${profileAnalysis}Lekker bezig, log succesvol verwerkt!`;
+        return `🤖 <b>AI Coach</b><br>${profileAnalysis}Lekker bezig, log succesvol verwerkt!`;
     }
 
     let advice = aiTemplates[category][intensity];
@@ -50,7 +50,7 @@ function getSmartAdvice(log, profile) {
     if (category === "Krachttraining") {
         const nextWeight = Number(amount) + 2.5;
         const nextTarget = `${nextWeight}${unit} voor dezelfde reps`;
-        advice = advice.replace("**TARGET**", nextTarget);
+        advice = advice.replace("<b>TARGET</b>", `<b>${nextTarget}</b>`);
     }
     
     // Macro opsplitsing formule (30% eiwit, 40% carbs, 30% vet)
@@ -58,10 +58,10 @@ function getSmartAdvice(log, profile) {
         const eiwit = Math.round((amount * 0.3) / 4);
         const carbs = Math.round((amount * 0.4) / 4);
         const vet = Math.round((amount * 0.3) / 9);
-        advice = advice.replace("**MACROS**", `${eiwit}g Eiwit, ${carbs}g Carbs, ${vet}g Vet`);
+        advice = advice.replace("<b>MACROS</b>", `<b>${eiwit}g Eiwit, ${carbs}g Carbs, ${vet}g Vet</b>`);
     }
 
-    advice = advice.replace("**DESC**", description).replace("**AMOUNT**", amount).replace("**UNIT**", unit);
+    advice = advice.replace("<b>DESC</b>", `<b>${description}</b>`).replace("<b>AMOUNT</b>", amount).replace("<b>UNIT</b>", unit);
 
-    return `🤖 **AI Coach**<br>${profileAnalysis}${advice}`;
+    return `🤖 <b>AI Coach</b><br>${profileAnalysis}${advice}`;
 }
