@@ -24,20 +24,22 @@
                 </div>
             </div>
             
-            <div class="mini-stats">
+            <div class="dashboard-stats">
                 <div class="stat-card">
                     <span class="stat-icon">👣</span>
-                    <h4>6.359</h4>
+                    <h2 id="stat-steps">0</h2>
                     <p>STEPS</p>
                 </div>
-                <div class="stat-card highlight">
+
+                <div class="stat-card active-card">
                     <span class="stat-icon">🔥</span>
-                    <h4 id="stat-kcal">0</h4>
+                    <h2 id="stat-kcal">0</h2>
                     <p>KCAL BURN</p>
                 </div>
+
                 <div class="stat-card">
                     <span class="stat-icon">❤️</span>
-                    <h4>123</h4>
+                    <h2 id="stat-bpm">0</h2>
                     <p>BPM</p>
                 </div>
             </div>
@@ -70,6 +72,8 @@
                     <option value="Krachttraining">Krachttraining (Gym)</option>
                     <option value="Cardio">Cardio / Conditie</option>
                     <option value="Voeding">Voeding / Kcal</option>
+                    <option value="Stappen">Stappen (Steps)</option>
+                    <option value="Hartslag">Hartslag (BPM)</option>
                 </select>
 
                 <label for="input-desc">Omschrijving:</label>
