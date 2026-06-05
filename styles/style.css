@@ -307,3 +307,31 @@ form input, form select {
 .nav-btn.active {
     color: #ccff00;
 }
+
+.profile-input {
+    width: 100%; 
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    color: #fff;
+    border-radius: 8px;
+}
+
+.btn-profile-save {
+    background: #ccff00; /* De felle gym-kleur uit jouw screenshot */
+    color: #000; 
+    border: none; 
+    padding: 12px; 
+    border-radius: 20px; 
+    font-weight: 800; 
+    width: 100%; 
+    cursor: pointer; 
+    text-transform: uppercase;
+    margin-top: 5px;
+    transition: background 0.2s ease;
+}
+
+.btn-profile-save:hover {
+    background: #b5e600; /* Iets donkerder bij eroverheen swipen/muis */
+}
