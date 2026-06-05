@@ -271,6 +271,58 @@ function vertaalApp(taal) {
     if (btnSubmit) btnSubmit.innerText = t.btnLogOpslaan;
 }
 
-// Start up applicatie met juiste taal
-vertaalApp(currentLang);
-renderLogs();
+function vertaalApp(taal) {
+    const t = vertalingen[taal];
+
+    // 1. Hoofdkoppen (H2's)
+    const koppen = document.querySelectorAll('h2');
+    koppen.forEach(h2 => {
+        const txt = h2.innerText.trim();
+        if (txt === "Mijn Dashboard" || txt === "Dashboard") h2.innerText = t.dashboardKop;
+        if (txt === "Nieuwe Log Toevoegen" || txt === "Add New Log") h2.innerText = t.logKop;
+        if (txt === "Instellingen" || txt === "Settings") h2.innerText = t.settingsKop;
+    });
+
+    // 2. Settings subkoppen (H3's)
+    const subKoppen = document.querySelectorAll('h3');
+    subKoppen.forEach(h3 => {
+        const txt = h3.innerText.trim();
+        if (txt === "Mijn Profiel" || txt === "My Profile") h3.innerText = t.profielKop;
+        if (txt === "Taal / Language" || txt === "Language / Taal") h3.innerText = t.taalKop;
+        if (txt === "Data Beheer" || txt === "Data Management") h3.innerText = t.dataKop;
+    });
+
+    // 3. De losse tekstjes (<p>) binnen Settings
+    const paragraphs = document.querySelectorAll('.settings-card p');
+    paragraphs.forEach(p => {
+        const txt = p.innerText.trim();
+        if (txt.includes("Wil je alle") || txt.includes("Are you sure")) {
+            p.innerText = taal === 'EN' ? "Want to clear all saved data?" : "Wil je alle opgeslagen gegevens wissen?";
+        }
+    });
+
+    // 4. Labels van het Log-formulier (op volgorde van je formulier)
+    const formLabels = document.querySelectorAll('#health-form label');
+    if (formLabels.length >= 6) {
+        formLabels[0].innerText = t.labelDatum;          // Eerste label: Datum
+        formLabels[1].innerText = t.labelCategorie;      // Tweede label: Categorie
+        formLabels[2].innerText = t.labelOmschrijving;   // Derde label: Omschrijving
+        formLabels[3].innerText = t.labelAantal;         // Vierde label: Aantal
+        formLabels[4].innerText = t.labelEenheid;        // Vijfde label: Eenheid
+        formLabels[5].innerText = t.labelIntensiteit;    // Zesde label: Hoe zwaar
+    }
+
+    // 5. Labels van het Profiel-formulier (Lengte / Gewicht)
+    const profileLabels = document.querySelectorAll('#screen-settings label');
+    if (profileLabels.length >= 2) {
+        profileLabels[0].innerText = t.labelLengte;
+        profileLabels[1].innerText = t.labelGewicht;
+    }
+
+    // 6. Knoppen vertalen (Opslaan & Reset)
+    if (btnSaveProfile) btnSaveProfile.innerText = t.btnOpslaan;
+    if (btnReset) btnReset.innerText = t.btnReset;
+    
+    const btnSubmit = document.querySelector('#health-form button');
+    if (btnSubmit) btnSubmit.innerText = t.btnLogOpslaan;
+}
