@@ -23,7 +23,7 @@ let profile = JSON.parse(localStorage.getItem('gymProfile')) || null;
 let currentLang = localStorage.getItem('gymLang') || 'NL';
 let activeFilter = 'day';
 
-// HET VERTALINGS-WOORDENBOEK
+// COMPLEET VERTALINGS-WOORDENBOEK
 const vertalingen = {
     NL: {
         dashboardKop: "Mijn Dashboard",
@@ -45,7 +45,17 @@ const vertalingen = {
         btnLogOpslaan: "OPSLAAN",
         noLogs: "Geen logs gevonden voor deze periode.",
         resetVraag: "Weet je zeker dat je alle gym-data wilt wissen?",
-        savedAlert: "Profiel succesvol bijgewerkt!"
+        savedAlert: "Profiel succesvol bijgewerkt!",
+        // Filters
+        filterDay: "Dag",
+        filterWeek: "Week",
+        filterMonth: "Maand",
+        // Categorieën Dropdown
+        optKrachttraining: "Krachttraining (Gym)",
+        optCardio: "Cardio",
+        optVoeding: "Voeding",
+        optStappen: "Stappen (Steps)",
+        optHartslag: "Hartslag (BPM)"
     },
     EN: {
         dashboardKop: "My Dashboard",
@@ -67,11 +77,20 @@ const vertalingen = {
         btnLogOpslaan: "SAVE LOG",
         noLogs: "No logs found for this period.",
         resetVraag: "Are you sure you want to clear all data?",
-        savedAlert: "Profile updated successfully!"
+        savedAlert: "Profile updated successfully!",
+        // Filters
+        filterDay: "Day",
+        filterWeek: "Week",
+        filterMonth: "Month",
+        // Categorieën Dropdown
+        optKrachttraining: "Strength Training (Gym)",
+        optCardio: "Cardio",
+        optVoeding: "Nutrition",
+        optStappen: "Steps",
+        optHartslag: "Heart Rate (BPM)"
     }
 };
 
-// Inladen van profieldata in de inputvelden als het bestaat
 if (profile && inputHeight && inputWeight) {
     inputHeight.value = profile.height;
     inputWeight.value = profile.weight;
@@ -87,7 +106,6 @@ navButtons.forEach(btn => {
     });
 });
 
-// Datum filter check
 function isInPeriod(logDateStr, period) {
     const logDate = new Date(logDateStr);
     const today = new Date();
@@ -99,33 +117,31 @@ function isInPeriod(logDateStr, period) {
     return true;
 }
 
-// Scherm updaten (Read)
 function renderLogs() {
     if (!logList) return;
     logList.innerHTML = '';
     
     const filteredLogs = logs.filter(log => isInPeriod(log.date, activeFilter));
 
-    // 1. Calorieën berekenen
     const totaalKcal = filteredLogs
         .filter(log => log.category === 'Voeding')
         .reduce((sum, log) => sum + Number(log.amount), 0);
     if (statKcal) statKcal.innerText = totaalKcal;
 
-    // 2. Stappen berekenen
     const totaalSteps = filteredLogs
         .filter(log => log.category === 'Stappen')
         .reduce((sum, log) => sum + Number(log.amount), 0);
     if (statSteps) statSteps.innerText = totaalSteps.toLocaleString('nl-NL');
 
-    // 3. Hartslag berekenen
     const hartslagLogs = filteredLogs.filter(log => log.category === 'Hartslag');
     const laatsteBpm = hartslagLogs.length > 0 ? hartslagLogs[hartslagLogs.length - 1].amount : 0;
     if (statBpm) statBpm.innerText = laatsteBpm;
 
-    // AI aanroepen
+    // AI AANROEPEN (Nu sturen we ook de gekozen taal mee!)
     const lastLog = filteredLogs[filteredLogs.length - 1];
-    if (aiAdvice) aiAdvice.innerHTML = getSmartAdvice(lastLog, profile);
+    if (aiAdvice && typeof getSmartAdvice === 'function') {
+        aiAdvice.innerHTML = getSmartAdvice(lastLog, profile, currentLang);
+    }
 
     if (filteredLogs.length === 0) {
         logList.innerHTML = `<p style="color:#8e8e93; font-size:0.9rem; text-align:center;">${vertalingen[currentLang].noLogs}</p>`;
@@ -147,7 +163,6 @@ function renderLogs() {
     });
 }
 
-// Log Opslaan (Create)
 healthForm.addEventListener('submit', function(e) {
     e.preventDefault();
     const newLog = {
@@ -166,7 +181,6 @@ healthForm.addEventListener('submit', function(e) {
     document.querySelector('[data-target="screen-dashboard"]').click();
 });
 
-// Profiel Opslaan
 btnSaveProfile.addEventListener('click', function() {
     profile = {
         height: inputHeight.value,
@@ -178,7 +192,6 @@ btnSaveProfile.addEventListener('click', function() {
     document.querySelector('[data-target="screen-dashboard"]').click();
 });
 
-// Dashboard periode filters
 filterButtons.forEach(btn => {
     btn.addEventListener('click', function() {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -188,7 +201,6 @@ filterButtons.forEach(btn => {
     });
 });
 
-// Reset database
 btnReset.addEventListener('click', function() {
     if (confirm(vertalingen[currentLang].resetVraag)) {
         logs = []; profile = null;
@@ -199,7 +211,6 @@ btnReset.addEventListener('click', function() {
     }
 });
 
-// TAAL WISSELEN EN VERTALEN
 if (btnNl && btnEn) {
     if (currentLang === 'EN') {
         btnEn.classList.add('active');
@@ -231,7 +242,7 @@ if (btnNl && btnEn) {
 function vertaalApp(taal) {
     const t = vertalingen[taal];
 
-    // 1. Vertaal alle Hoofdkoppen (H2's)
+    // 1. Hoofdkoppen (H2's)
     const dashboardKop = document.querySelector('#screen-dashboard h2') || document.querySelector('.main-content h2');
     const logKop = document.querySelector('#screen-log h2') || document.querySelectorAll('h2')[1];
     const settingsKop = document.querySelector('#screen-settings h2');
@@ -240,7 +251,7 @@ function vertaalApp(taal) {
     if (logKop) logKop.innerText = t.logKop;
     if (settingsKop) settingsKop.innerText = t.settingsKop;
 
-    // 2. Vertaal Settings Cards (H3's)
+    // 2. Settings subkoppen (H3's)
     const settingsH3s = document.querySelectorAll('#screen-settings h3');
     if (settingsH3s.length >= 3) {
         settingsH3s[0].innerText = t.profielKop;
@@ -248,15 +259,15 @@ function vertaalApp(taal) {
         settingsH3s[2].innerText = t.dataKop;
     }
 
-    // 3. Vertaal Settings Labels en Knoppen
-    const labelLengte = document.querySelector('label[for="profile-height"]');
-    const labelGewicht = document.querySelector('label[for="profile-weight"]');
+    // 3. Settings Labels en Knoppen
+    const labelLengte = document.querySelector('label[for="profile-height"]') || document.querySelectorAll('#screen-settings label')[0];
+    const labelGewicht = document.querySelector('label[for="profile-weight"]') || document.querySelectorAll('#screen-settings label')[1];
     if (labelLengte) labelLengte.innerText = t.labelLengte;
     if (labelGewicht) labelGewicht.innerText = t.labelGewicht;
     if (btnSaveProfile) btnSaveProfile.innerText = t.btnOpslaan;
     if (btnReset) btnReset.innerText = t.btnReset;
 
-    // 4. Vertaal het complete Log Formulier (Labels + Knop)
+    // 4. Log Formulier Labels + Opslaan Knop
     const labelsForm = document.querySelectorAll('#health-form label');
     if (labelsForm.length >= 6) {
         labelsForm[0].innerText = t.labelDatum;
@@ -266,63 +277,46 @@ function vertaalApp(taal) {
         labelsForm[4].innerText = t.labelEenheid;
         labelsForm[5].innerText = t.labelIntensiteit;
     }
-    
-    const btnSubmit = document.querySelector('#health-form button[type="submit"]') || document.querySelector('.btn-submit') || document.getElementById('health-form').querySelector('button');
+    const btnSubmit = document.getElementById('health-form').querySelector('button');
     if (btnSubmit) btnSubmit.innerText = t.btnLogOpslaan;
-}
 
-function vertaalApp(taal) {
-    const t = vertalingen[taal];
-
-    // 1. Hoofdkoppen (H2's)
-    const koppen = document.querySelectorAll('h2');
-    koppen.forEach(h2 => {
-        const txt = h2.innerText.trim();
-        if (txt === "Mijn Dashboard" || txt === "Dashboard") h2.innerText = t.dashboardKop;
-        if (txt === "Nieuwe Log Toevoegen" || txt === "Add New Log") h2.innerText = t.logKop;
-        if (txt === "Instellingen" || txt === "Settings") h2.innerText = t.settingsKop;
+    // 5. NIEUW: Dashboard Periode Filters (Dag / Week / Maand)
+    filterButtons.forEach(btn => {
+        const filterType = btn.getAttribute('data-filter');
+        if (filterType === 'day') btn.innerText = t.filterDay;
+        if (filterType === 'week') btn.innerText = t.filterWeek;
+        if (filterType === 'month') btn.innerText = t.filterMonth;
     });
 
-    // 2. Settings subkoppen (H3's)
-    const subKoppen = document.querySelectorAll('h3');
-    subKoppen.forEach(h3 => {
-        const txt = h3.innerText.trim();
-        if (txt === "Mijn Profiel" || txt === "My Profile") h3.innerText = t.profielKop;
-        if (txt === "Taal / Language" || txt === "Language / Taal") h3.innerText = t.taalKop;
-        if (txt === "Data Beheer" || txt === "Data Management") h3.innerText = t.dataKop;
-    });
+    // 6. NIEUW: Categorie Dropdown Opties live vertalen
+    const selectCategory = document.getElementById('input-category');
+    if (selectCategory) {
+        Array.from(selectCategory.options).forEach(opt => {
+            if (opt.value === 'Krachttraining') opt.innerText = t.optKrachttraining;
+            if (opt.value === 'Cardio') opt.innerText = t.optCardio;
+            if (opt.value === 'Voeding') opt.innerText = t.optVoeding;
+            if (opt.value === 'Stappen') opt.innerText = t.optStappen;
+            if (opt.value === 'Hartslag') opt.innerText = t.optHartslag;
+        });
+    }
 
-    // 3. De losse tekstjes (<p>) binnen Settings
+    // 7. NIEUW: Intensiteit Dropdown Opties live vertalen
+    const selectIntensity = document.getElementById('input-intensity');
+    if (selectIntensity) {
+        Array.from(selectIntensity.options).forEach(opt => {
+            if (opt.value === 'Zwaar') opt.innerText = taal === 'EN' ? 'Heavy / High' : 'Zwaar';
+            if (opt.value === 'Gemiddeld') opt.innerText = taal === 'EN' ? 'Moderate' : 'Gemiddeld';
+            if (opt.value === 'Licht') opt.innerText = taal === 'EN' ? 'Light' : 'Licht';
+        });
+    }
+
+    // 8. Settings omschrijving tekstje
     const paragraphs = document.querySelectorAll('.settings-card p');
     paragraphs.forEach(p => {
-        const txt = p.innerText.trim();
-        if (txt.includes("Wil je alle") || txt.includes("Are you sure")) {
-            p.innerText = taal === 'EN' ? "Want to clear all saved data?" : "Wil je alle opgeslagen gegevens wissen?";
-        }
+        p.innerText = taal === 'EN' ? "Want to clear all saved data?" : "Wil je alle opgeslagen gegevens wissen?";
     });
-
-    // 4. Labels van het Log-formulier (op volgorde van je formulier)
-    const formLabels = document.querySelectorAll('#health-form label');
-    if (formLabels.length >= 6) {
-        formLabels[0].innerText = t.labelDatum;          // Eerste label: Datum
-        formLabels[1].innerText = t.labelCategorie;      // Tweede label: Categorie
-        formLabels[2].innerText = t.labelOmschrijving;   // Derde label: Omschrijving
-        formLabels[3].innerText = t.labelAantal;         // Vierde label: Aantal
-        formLabels[4].innerText = t.labelEenheid;        // Vijfde label: Eenheid
-        formLabels[5].innerText = t.labelIntensiteit;    // Zesde label: Hoe zwaar
-    }
-
-    // 5. Labels van het Profiel-formulier (Lengte / Gewicht)
-    const profileLabels = document.querySelectorAll('#screen-settings label');
-    if (profileLabels.length >= 2) {
-        profileLabels[0].innerText = t.labelLengte;
-        profileLabels[1].innerText = t.labelGewicht;
-    }
-
-    // 6. Knoppen vertalen (Opslaan & Reset)
-    if (btnSaveProfile) btnSaveProfile.innerText = t.btnOpslaan;
-    if (btnReset) btnReset.innerText = t.btnReset;
-    
-    const btnSubmit = document.querySelector('#health-form button');
-    if (btnSubmit) btnSubmit.innerText = t.btnLogOpslaan;
 }
+
+// Opstarten
+vertaalApp(currentLang);
+renderLogs();
