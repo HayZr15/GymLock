@@ -117,27 +117,31 @@ function isInPeriod(logDateStr, period) {
     return true;
 }
 
+// Scherm updaten (Read + Delete)
 function renderLogs() {
     if (!logList) return;
     logList.innerHTML = '';
     
     const filteredLogs = logs.filter(log => isInPeriod(log.date, activeFilter));
 
+    // 1. Calorieën berekenen
     const totaalKcal = filteredLogs
         .filter(log => log.category === 'Voeding')
         .reduce((sum, log) => sum + Number(log.amount), 0);
     if (statKcal) statKcal.innerText = totaalKcal;
 
+    // 2. Stappen berekenen
     const totaalSteps = filteredLogs
         .filter(log => log.category === 'Stappen')
         .reduce((sum, log) => sum + Number(log.amount), 0);
     if (statSteps) statSteps.innerText = totaalSteps.toLocaleString('nl-NL');
 
+    // 3. Hartslag berekenen
     const hartslagLogs = filteredLogs.filter(log => log.category === 'Hartslag');
     const laatsteBpm = hartslagLogs.length > 0 ? hartslagLogs[hartslagLogs.length - 1].amount : 0;
     if (statBpm) statBpm.innerText = laatsteBpm;
 
-    // AI AANROEPEN (Nu sturen we ook de gekozen taal mee!)
+    // AI aanroepen
     const lastLog = filteredLogs[filteredLogs.length - 1];
     if (aiAdvice && typeof getSmartAdvice === 'function') {
         aiAdvice.innerHTML = getSmartAdvice(lastLog, profile, currentLang);
@@ -151,14 +155,36 @@ function renderLogs() {
     filteredLogs.forEach(log => {
         const div = document.createElement('div');
         div.className = 'log-item';
-        div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.padding = '12px 0'; div.style.borderBottom = '1px solid #2c2c2e';
+        // Flexbox aangepast zodat de prullenbak netjes rechts staat en alles verticaal gecentreerd is
+        div.style.display = 'flex'; 
+        div.style.justifyContent = 'space-between'; 
+        div.style.alignItems = 'center'; 
+        div.style.padding = '12px 0'; 
+        div.style.borderBottom = '1px solid #2c2c2e';
+        
         div.innerHTML = `
             <div>
                 <span style="font-weight:700; color:#ccff00;">${log.description}</span>
                 <p style="font-size:0.75rem; color:#8e8e93;">${log.date} • ${log.category}</p>
             </div>
-            <span style="font-weight:700;">${log.amount} ${log.unit}</span>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="font-weight:700;">${log.amount} ${log.unit}</span>
+                <button class="btn-delete" style="background: none; border: none; color: #ff453a; cursor: pointer; font-size: 1.1rem; padding: 4px 8px; transition: transform 0.1s;">🗑️</button>
+            </div>
         `;
+
+        // Klik-event koppelen aan de specifieke prullenbak
+        const deleteBtn = div.querySelector('.btn-delete');
+        deleteBtn.addEventListener('click', () => {
+            const vraag = currentLang === 'EN' 
+                ? "Are you sure you want to delete this log?" 
+                : "Weet je zeker dat je deze log wilt verwijderen?";
+                
+            if (confirm(vraag)) {
+                deleteLog(log.id);
+            }
+        });
+
         logList.appendChild(div);
     });
 }
@@ -317,6 +343,13 @@ function vertaalApp(taal) {
     });
 }
 
-// Opstarten
+// Log Verwijderen (Delete)
+function deleteLog(id) {
+    logs = logs.filter(log => log.id !== id);
+    localStorage.setItem('gymLogs', JSON.stringify(logs));
+    renderLogs();
+}
+
+// Opstarten (Nu netjes één keer uitgevoerd!)
 vertaalApp(currentLang);
 renderLogs();
