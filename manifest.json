@@ -1,7 +1,7 @@
 {
-  "name": "GymProgress",
-  "short_name": "GymProgress",
-  "description": "Jouw persoonlijke fitness en health tracker",
+  "name": "GymLock",
+  "short_name": "GymLock",
+  "description": "Get locked in. Jouw persoonlijke fitness en health tracker.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#1c1c1e",
@@ -13,7 +13,7 @@
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512x512.png",
+      "src": "icons/icon_GymLock.png",
       "sizes": "512x512",
       "type": "image/png"
     }

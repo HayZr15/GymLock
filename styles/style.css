@@ -12,6 +12,12 @@ body {
     min-height: 100vh;
 }
 
+#app-logo {
+    display: block;
+    margin: 0 auto 15px auto;
+    width: 150px;
+}
+
 /* Zorgt ervoor dat de app gecentreerd en strak blijft op desktop */
 .app-container {
     max-width: 600px;
