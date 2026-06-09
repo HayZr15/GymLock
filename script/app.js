@@ -208,14 +208,27 @@ healthForm.addEventListener('submit', function(e) {
 });
 
 btnSaveProfile.addEventListener('click', function() {
-    profile = {
-        height: inputHeight.value,
-        weight: inputWeight.value
+    let profile = JSON.parse(localStorage.getItem('gymLockProfile')) || {
+        height: 0,
+        weight: 0,
+        age: 0,
+        frequency: '3-4'
     };
-    localStorage.setItem('gymProfile', JSON.stringify(profile));
-    alert(vertalingen[currentLang].savedAlert);
-    renderLogs();
-    document.querySelector('[data-target="screen-dashboard"]').click();
+
+    // Profiel opslaan functie
+    function saveProfile() {
+        const height = Number(document.getElementById('profile-height').value);
+        const weight = Number(document.getElementById('profile-weight').value);
+        const age = Number(document.getElementById('profile-age').value);
+        const frequency = document.getElementById('profile-frequency').value;
+
+        profile = { height, weight, age, frequency };
+        localStorage.setItem('gymLockProfile', JSON.stringify(profile));
+        
+        // Genereer direct een nieuw trainingsprogramma op basis van deze data
+        generateWorkoutProgram();
+        renderLogs();
+    }
 });
 
 filterButtons.forEach(btn => {
@@ -263,6 +276,43 @@ if (btnNl && btnEn) {
         vertaalApp('EN');
         renderLogs();
     });
+}
+
+function generateWorkoutProgram() {
+    if (!profile.height || !profile.weight || !profile.age) return null;
+
+    const heightInMeters = profile.height / 100;
+    const bmi = profile.weight / (heightInMeters * heightInMeters);
+    let goal = "Kracht & Conditie";
+    let split = "Full Body";
+    let focus = "Algemene fitheid";
+
+    // Bepaal het doel op basis van BMI
+    if (bmi < 18.5) {
+        goal = "Hypertrofie (Spiermassa opbouwen)";
+        focus = "Progressive overload en calorie-overschot";
+    } else if (bmi >= 25) {
+        goal = "Vetverlies & Definitie";
+        focus = "Cardio-intervallen gecombineerd met krachttraining";
+    }
+
+    // Bepaal de trainingsverdeling op basis van frequentie
+    if (profile.frequency === '3-4') {
+        split = "Upper / Lower Split of Push / Pull / Legs";
+    } else if (profile.frequency === '5+') {
+        split = "Gespecialiseerde Split (Borst/Rug, Armen/Schouders, Benen)";
+    }
+
+    const program = {
+        title: `GymLock Custom Program`,
+        goal: goal,
+        split: split,
+        focus: focus,
+        intensity: profile.age > 45 ? "Gedoseerd (Focus op herstel)" : "High Intensity"
+    };
+
+    localStorage.setItem('gymLockProgram', JSON.stringify(program));
+    return program;
 }
 
 function vertaalApp(taal) {
@@ -375,7 +425,6 @@ function deleteLog(id) {
     renderLogs();
 }
 
-// Opstarten (Nu netjes één keer uitgevoerd!)
 vertaalApp(currentLang);
 renderLogs();
 
