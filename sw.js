@@ -1,12 +1,14 @@
 const CACHE_NAME = 'gymlock-cache-v1';
-// Hier zetten we alle bestanden die de app offline nodig heeft
+
 const ASSETS = [
   './',
   './index.html',
+  './styles/style.css',
   './script/app.js',
   './script/ai-coach.js',
-  './manifest.json'
-  // Als je een CSS-bestand hebt, zet die er dan hier ook tussen, bijv: './css/style.css'
+  './manifest.json',
+  './icons/icon-192x192.png',
+  './icons/icon_GymLock.png'
 ];
 
 // 1. Installeer de Service Worker en sla de bestanden op in de cache
