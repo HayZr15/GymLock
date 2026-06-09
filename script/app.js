@@ -353,3 +353,12 @@ function deleteLog(id) {
 // Opstarten (Nu netjes één keer uitgevoerd!)
 vertaalApp(currentLang);
 renderLogs();
+
+// Service Worker Registratie voor PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker succesvol geregistreerd!', reg))
+            .catch(err => console.error('Service Worker registratie mislukt:', err));
+    });
+}
