@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --bg-main: #0c0c0e;         
+    --bg-card: #16161a;         
+    --bg-input: #1f1f24;        
+    --accent: #ccff00;          
+    --text-main: #ffffff;       
+    --text-muted: #8e8e93;      
+    --border-color: #242429;    
+    --radius-sharp: 6px;        
+    --transition: all 0.2s ease-in-out;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    padding-bottom: 90px; 
+}
+
+h1, h2, h3, h4 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: uppercase; 
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-bottom: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 16px;
+}
+
+.app-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-main);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.app-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--accent); 
+    letter-spacing: 0.05em;
+}
+
+.dashboard-card, .settings-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sharp);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.dashboard-card h3, .settings-card h3 {
+    font-size: 1rem;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+    border-left: 3px solid var(--accent); 
+    padding-left: 10px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+}
+
+input, select {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sharp);
+    color: var(--text-main);
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+input:focus, select:focus {
+    border-color: var(--accent);
+}
+
+.btn-primary {
+    width: 100%;
+    background-color: var(--accent);
+    color: var(--bg-main); 
+    border: none;
+    border-radius: var(--radius-sharp);
+    padding: 14px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background-color: #b8e600;
+}
+
+.btn-danger {
+    width: 100%;
+    background-color: transparent;
+    color: #ff453a; 
+    border: 1px solid #ff453a;
+    border-radius: var(--radius-sharp);
+    padding: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-danger:hover {
+    background-color: rgba(255, 69, 58, 0.1);
+}
+
+.filter-btn {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: var(--radius-sharp);
+    cursor: pointer;
+}
+
+.log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.log-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.log-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.btn-delete:hover {
+    color: #ff453a;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background-color: #111113;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.nav-item.active {
+    color: var(--accent);
+}
+
+.hidden {
+    display: none !important;
+}

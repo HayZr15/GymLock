@@ -4,181 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymLock</title>
-    <meta name="theme-color" content="#ccff00">
-    <link rel="stylesheet" href="styles/style.css">
     <link rel="manifest" href="manifest.json">
+    <!-- Theme colors (light/dark) for browsers that support them -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ccff00">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#99cc00">
+    <meta name="msapplication-TileColor" content="#ccff00"> <!-- Windows -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="#ccff00"> <!-- iOS Safari -->
+    <link rel="apple-touch-icon" href="icon-192x192.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <header>
-        <img id="app-logo" src="icons/icon_GymLock.png" alt="GymLock Logo" class="app-logo">
-        <h1 class="app-title">💪 GymLock</h1>
+    <header class="app-header">
+        <div class="container header-top">
+            <h1 class="app-title">GymLock</h1>
+            <button id="btn-lang-toggle" class="filter-btn lang-toggle-btn">EN</button>
+        </div>
     </header>
 
-    <main class="app-container">
-        <section id="screen-dashboard" class="app-screen active">
-            <div class="user-profile">
-                <div class="avatar">⚡</div>
-                <div>
-                    <span class="welcome-text">Welkom terug,</span>
-                    <h3 class="user-name">Gym Bro</h3>
-                </div>
-            </div>
-            
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <span class="stat-icon">👣</span>
-                    <h2 id="stat-steps">0</h2>
-                    <p>STEPS</p>
-                </div>
+    <main class="container">
 
-                <div class="stat-card active-card">
-                    <span class="stat-icon">🔥</span>
-                    <h2 id="stat-kcal">0</h2>
-                    <p>KCAL BURN</p>
-                </div>
+        <section id="view-dashboard" class="app-view">
+            <div id="workout-program-container"></div>
 
-                <div class="stat-card">
-                    <span class="stat-icon">❤️</span>
-                    <h2 id="stat-bpm">0</h2>
-                    <p>BPM</p>
-                </div>
-
-                <div class="dashboard-card chart-card">
-                    <h3>Voortgang</h3>
-                    <p class="subtitle">Gewichtsverloop afgelopen periode</p>
+            <div class="dashboard-card chart-card">
+                <h3 id="title-chart">Voortgang</h3>
+                <p id="sub-chart" class="subtitle">Gewichtsverloop afgelopen periode</p>
+                <div class="chart-wrapper">
                     <canvas id="progressChart"></canvas>
                 </div>
             </div>
+        </section>
 
-            <div id="ai-coach-box">
-                <h3>🤖 Offline AI Coach</h3>
-                <p id="ai-advice">Voer je eerste training in voor persoonlijk advies!</p>
+        <section id="view-logs" class="app-view hidden">
+            <div class="dashboard-card">
+                <h3 id="title-add-log">Activiteit Loggen</h3>
+                <p id="sub-add-log" class="subtitle">Voer je training of fysiometrie in</p>
+                
+                <form id="form-add-log" onsubmit="event.preventDefault(); addNewLog();">
+                    <div class="form-group">
+                        <label id="label-category" for="input-category">Categorie</label>
+                        <select id="input-category">
+                            <option value="Krachttraining">Krachttraining</option>
+                            <option value="Cardio">Cardio</option>
+                            <option value="Voeding">Voeding</option>
+                            <option value="Stappen">Stappen</option>
+                            <option value="Hartslag">Hartslag</option>
+                            <option value="Gewicht">Gewicht (kg)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label id="label-amount" for="input-amount">Waarde / Aantal</label>
+                        <input type="number" id="input-amount" required placeholder="Bijv. 80">
+                    </div>
+                    <div class="form-group">
+                        <label id="label-date" for="input-date">Datum</label>
+                        <input type="date" id="input-date" required>
+                    </div>
+                    <button type="submit" id="btn-submit-log" class="btn-primary">Log Opslaan</button>
+                </form>
             </div>
 
-            <div class="filters">
-                <button id="filter-day" class="filter-btn active" data-filter="day">Dag</button>
-                <button id="filter-week" class="filter-btn" data-filter="week">Week</button>
-                <button id="filter-month" class="filter-btn" data-filter="month">Maand</button>
-            </div>
-
-            <h2>Gezondheidslogs</h2>
-            <div id="log-list">
-                <p>Nog geen gegevens ingevoerd voor deze periode.</p>
+            <div class="dashboard-card">
+                <h3 id="title-history">Geschiedenis</h3>
+                <p id="sub-history" class="subtitle">Je geregistreerde activiteiten</p>
+                <div id="log-list"></div>
             </div>
         </section>
 
-        <section id="screen-add" class="app-screen">
-            <h2>Nieuwe Log Toevoegen</h2>
-            <form id="health-form">
-                <label for="input-date">Datum:</label>
-                <input type="date" id="input-date" required>
+        <section id="view-settings" class="app-view hidden">
+            <div class="settings-card profile-card">
+                <h3 id="title-profile-card">Profiel</h3>
+                <p id="sub-profile-card" class="subtitle">Je fysiologische eigenschappen voor het schema</p>
+                
+                <div class="form-group">
+                    <label id="label-height" for="profile-height">Lengte (cm)</label>
+                    <input type="number" id="profile-height" placeholder="Bijv. 180">
+                </div>
+                <div class="form-group">
+                    <label id="label-weight" for="profile-weight">Gewicht (kg)</label>
+                    <input type="number" id="profile-weight" placeholder="Bijv. 80">
+                </div>
+                <div class="form-group">
+                    <label id="label-age" for="profile-age">Leeftijd</label>
+                    <input type="number" id="profile-age" placeholder="Bijv. 24">
+                </div>
+                <div class="form-group">
+                    <label id="label-frequency" for="profile-frequency">Trainingen per week</label>
+                    <select id="profile-frequency">
+                        <option value="1-2">1 - 2</option>
+                        <option value="3-4">3 - 4</option>
+                        <option value="5+">5+</option>
+                    </select>
+                </div>
+                <button id="btn-save-profile" class="btn-primary" onclick="saveProfile()">Profiel Opslaan</button>
+            </div>
 
-                <label for="input-category">Categorie:</label>
-                <select id="input-category" required>
-                    <option value="Krachttraining">Krachttraining (Gym)</option>
-                    <option value="Cardio">Cardio / Conditie</option>
-                    <option value="Voeding">Voeding / Kcal</option>
-                    <option value="Stappen">Stappen (Steps)</option>
-                    <option value="Hartslag">Hartslag (BPM)</option>
-                </select>
-
-                <label for="input-desc">Omschrijving:</label>
-                <input type="text" id="input-desc" placeholder="Bijv. Bench Press of Proteïneshake" required>
-
-                <label for="input-amount">Aantal / Gewicht / Kcal:</label>
-                <input type="number" id="input-amount" placeholder="Bijv. 80 of 400" required>
-
-                <label for="input-unit">Eenheid:</label>
-                <select id="input-unit" required>
-                    <option value="kg">kg (Gewicht)</option>
-                    <option value="min">min (Duur)</option>
-                    <option value="kcal">kcal (Calorieën)</option>
-                </select>
-
-                <label for="input-intensity">Hoe zwaar was het?</label>
-                <select id="input-intensity">
-                    <option value="Licht">Licht</option>
-                    <option value="Gemiddeld">Gemiddeld</option>
-                    <option value="Zwaar">Zwaar</option>
-                </select>
-
-                <button type="submit" id="btn-save">Opslaan</button>
-            </form>
+            <div class="settings-card data-card">
+                <h3 id="title-data-management">Data Beheer</h3>
+                <p id="text-clear-data" class="clear-data-text">Wil je alle opgeslagen gegevens wissen?</p>
+                <button id="btn-reset-data" class="btn-danger" onclick="resetAllData()">Reset Alle Gegevens</button>
+            </div>
         </section>
 
-<section id="screen-settings" class="app-screen">
-        <h2>Instellingen</h2>
-        
-        <div class="settings-card profile-card">
-            <h3>Profiel</h3>
-            <div class="form-group">
-                <label for="profile-height">Lengte (cm)</label>
-                <input type="number" id="profile-height" placeholder="Bijv. 180">
-            </div>
-            <div class="form-group">
-                <label for="profile-weight">Gewicht (kg)</label>
-                <input type="number" id="profile-weight" placeholder="Bijv. 80">
-            </div>
-            <div class="form-group">
-                <label for="profile-age">Leeftijd</label>
-                <input type="number" id="profile-age" placeholder="Bijv. 24">
-            </div>
-            <div class="form-group">
-                <label for="profile-frequency">Trainingen per week</label>
-                <select id="profile-frequency">
-                    <option value="1-2">1 tot 2 keer per week</option>
-                    <option value="3-4">3 tot 4 keer per week</option>
-                    <option value="5+">5 of meer keer per week</option>
-                </select>
-            </div>
-            <button id="btn-save-profile" class="btn-primary">Profiel Opslaan</button>
-        </div>
-
-        <div class="settings-card">
-            <h3>Taal / Language</h3>
-            <div class="lang-buttons">
-                <button id="btn-lang-nl" class="active">NL</button>
-                <button id="btn-lang-en">EN</button>
-            </div>
-        </div>
-
-        <div class="settings-card">
-            <h3>Data Beheer</h3>
-            <p>Wil je alle opgeslagen gegevens wissen?</p>
-            <button id="btn-reset">Reset Alle Gegevens</button>
-        </div>
-    </section>
     </main>
 
     <nav class="bottom-nav">
-        <button class="nav-btn active" data-target="screen-dashboard">
-            <span class="nav-icon">📊</span>
-            <span class="nav-text">Stats</span>
+        <button class="nav-item active" onclick="switchView('dashboard', this)">
+            <span id="nav-dashboard">Dashboard</span>
         </button>
-        <button class="nav-btn" data-target="screen-add">
-            <span class="nav-icon">➕</span>
-            <span class="nav-text">Log</span>
+        <button class="nav-item" onclick="switchView('logs', this)">
+            <span id="nav-logs">Logs</span>
         </button>
-        <button class="nav-btn" data-target="screen-settings">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-text">Opties</span>
+        <button class="nav-item" onclick="switchView('settings', this)">
+            <span id="nav-settings">Instellingen</span>
         </button>
     </nav>
 
-    <script src="script/ai-coach.js"></script>
     <script src="script/app.js"></script>
-
-    <script>
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker geregistreerd'))
-      .catch(err => console.error(err));
-  });
-}
-</script>
 </body>
 </html>

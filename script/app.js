@@ -1,438 +1,369 @@
-const healthForm = document.getElementById('health-form');
-const logList = document.getElementById('log-list');
-const btnReset = document.getElementById('btn-reset');
-const aiAdvice = document.getElementById('ai-advice');
-const statKcal = document.getElementById('stat-kcal');
-const filterButtons = document.querySelectorAll('.filter-btn');
-const navButtons = document.querySelectorAll('.nav-btn');
-const appScreens = document.querySelectorAll('.app-screen');
-const statSteps = document.getElementById('stat-steps');
-const statBpm = document.getElementById('stat-bpm');
+// ================= GLOBALE APPLICATIE STATE =================
+let logs = JSON.parse(localStorage.getItem('gymLockLogs')) || [];
+let progressChart = null;
+let currentLang = localStorage.getItem('gymLockLang') || 'NL';
 
-// Profiel elementen
-const inputHeight = document.getElementById('profile-height');
-const inputWeight = document.getElementById('profile-weight');
-const btnSaveProfile = document.getElementById('btn-save-profile');
+let profile = JSON.parse(localStorage.getItem('gymLockProfile')) || {
+    height: 0,
+    weight: 0,
+    age: 0,
+    frequency: '3-4'
+};
 
-// Taal elementen
-const btnNl = document.getElementById('btn-lang-nl');
-const btnEn = document.getElementById('btn-lang-en');
-
-let logs = JSON.parse(localStorage.getItem('gymLogs')) || [];
-let profile = JSON.parse(localStorage.getItem('gymProfile')) || null;
-let currentLang = localStorage.getItem('gymLang') || 'NL';
-let activeFilter = 'day';
-
-// COMPLEET VERTALINGS-WOORDENBOEK
-const vertalingen = {
+// ================= VERTAAL DICTIONARY (Echt Alles Compleet) =================
+const info = {
     NL: {
-        dashboardKop: "Mijn Dashboard",
-        logKop: "Nieuwe Log Toevoegen",
-        settingsKop: "Instellingen",
-        profielKop: "Mijn Profiel",
-        taalKop: "Taal / Language",
-        dataKop: "Data Beheer",
-        labelLengte: "Lengte (in cm):",
-        labelGewicht: "Gewicht (in kg):",
+        titleChart: "Voortgang",
+        subChart: "Gewichtsverloop afgelopen periode",
+        titleAddLog: "Activiteit Loggen",
+        subAddLog: "Voer je training of fysiometrie in",
+        labelCategory: "Categorie",
+        labelAmount: "Waarde / Aantal",
+        labelDate: "Datum",
+        btnSubmitLog: "Log Opslaan",
+        titleHistory: "Geschiedenis",
+        subHistory: "Je geregistreerde activiteiten",
+        titleProfileCard: "Profiel",
+        subProfileCard: "Je fysiologische eigenschappen voor het schema",
+        labelLengte: "Lengte (cm)",
+        labelGewicht: "Gewicht (kg)",
+        labelAge: "Leeftijd",
+        labelFrequency: "Trainingen per week",
         btnOpslaan: "Profiel Opslaan",
+        dataKop: "Data Beheer",
+        textClearData: "Wil je alle opgeslagen gegevens wissen?",
         btnReset: "Reset Alle Gegevens",
-        labelDatum: "Datum:",
-        labelCategorie: "Categorie:",
-        labelOmschrijving: "Omschrijving:",
-        labelAantal: "Aantal / Gewicht / Kcal:",
-        labelEenheid: "Eenheid:",
-        labelIntensiteit: "Hoe zwaar was het? (Voor AI Coach):",
-        btnLogOpslaan: "OPSLAAN",
-        noLogs: "Geen logs gevonden voor deze periode.",
-        resetVraag: "Weet je zeker dat je alle gym-data wilt wissen?",
-        savedAlert: "Profiel succesvol bijgewerkt!",
-        // Filters
-        filterDay: "Dag",
-        filterWeek: "Week",
-        filterMonth: "Maand",
-        // Categorieën Dropdown
-        optKrachttraining: "Krachttraining (Gym)",
-        optCardio: "Cardio",
-        optVoeding: "Voeding",
-        optStappen: "Stappen (Steps)",
-        optHartslag: "Hartslag (BPM)"
+        navDashboard: "Dashboard",
+        navLogs: "Logs",
+        navSettings: "Instellingen",
+        msgSaved: "Profiel succesvol bijgewerkt.",
+        msgResetConfirm: "Weet je zeker dat je alle data wilt wissen? Dit kan niet ongedaan worden gemaakt."
     },
     EN: {
-        dashboardKop: "My Dashboard",
-        logKop: "Add New Log",
-        settingsKop: "Settings",
-        profielKop: "My Profile",
-        taalKop: "Language / Taal",
-        dataKop: "Data Management",
-        labelLengte: "Height (in cm):",
-        labelGewicht: "Weight (in kg):",
+        titleChart: "Progress",
+        subChart: "Weight distribution over time",
+        titleAddLog: "Log Activity",
+        subAddLog: "Enter your training or fysiometrics",
+        labelCategory: "Category",
+        labelAmount: "Value / Amount",
+        labelDate: "Date",
+        btnSubmitLog: "Save Log",
+        titleHistory: "History",
+        subHistory: "Your registered activities",
+        titleProfileCard: "Profile",
+        subProfileCard: "Your physiological attributes for scheduling",
+        labelLengte: "Height (cm)",
+        labelGewicht: "Weight (kg)",
+        labelAge: "Age",
+        labelFrequency: "Workouts per week",
         btnOpslaan: "Save Profile",
+        dataKop: "Data Management",
+        textClearData: "Want to clear all saved data?",
         btnReset: "Reset All Data",
-        labelDatum: "Date:",
-        labelCategorie: "Category:",
-        labelOmschrijving: "Description:",
-        labelAantal: "Amount / Weight / Kcal:",
-        labelEenheid: "Unit:",
-        labelIntensiteit: "How heavy was it? (For AI Coach):",
-        btnLogOpslaan: "SAVE LOG",
-        noLogs: "No logs found for this period.",
-        resetVraag: "Are you sure you want to clear all data?",
-        savedAlert: "Profile updated successfully!",
-        // Filters
-        filterDay: "Day",
-        filterWeek: "Week",
-        filterMonth: "Month",
-        // Categorieën Dropdown
-        optKrachttraining: "Strength Training (Gym)",
-        optCardio: "Cardio",
-        optVoeding: "Nutrition",
-        optStappen: "Steps",
-        optHartslag: "Heart Rate (BPM)"
+        navDashboard: "Dashboard",
+        navLogs: "Logs",
+        navSettings: "Settings",
+        msgSaved: "Profile updated successfully.",
+        msgResetConfirm: "Are you sure you want to clear all data? This cannot be undone."
     }
 };
 
-if (profile && inputHeight && inputWeight) {
-    inputHeight.value = profile.height;
-    inputWeight.value = profile.weight;
-}
+// ================= APP INITIALISATIE & NAVIGATIE =================
+document.addEventListener('DOMContentLoaded', () => {
+    // Stel de datum-input standaard in op vandaag
+    const dateInput = document.getElementById('input-date');
+    if (dateInput) dateInput.valueToDate = new Date();
 
-// Menu Schakelen
-navButtons.forEach(btn => {
-    btn.addEventListener('click', function() {
-        navButtons.forEach(b => b.classList.remove('active'));
-        appScreens.forEach(s => s.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById(this.getAttribute('data-target')).classList.add('active');
-    });
-});
+    // Vul de profielvelden in vanuit localStorage
+    if (profile.height) document.getElementById('profile-height').value = profile.height;
+    if (profile.weight) document.getElementById('profile-weight').value = profile.weight;
+    if (profile.age) document.getElementById('profile-age').value = profile.age;
+    if (profile.frequency) document.getElementById('profile-frequency').value = profile.frequency;
 
-function isInPeriod(logDateStr, period) {
-    const logDate = new Date(logDateStr);
-    const today = new Date();
-    today.setHours(0,0,0,0); logDate.setHours(0,0,0,0);
-    const diffDays = Math.ceil((today - logDate) / (1000 * 60 * 60 * 24));
-    if (period === 'day') return diffDays === 0;
-    if (period === 'week') return diffDays >= 0 && diffDays <= 7;
-    if (period === 'month') return diffDays >= 0 && diffDays <= 30;
-    return true;
-}
+    // Koppel de taalwisselknop
+    document.getElementById('btn-lang-toggle').addEventListener('click', toggleLanguage);
 
-// Scherm updaten (Read + Delete)
-function renderLogs() {
-    if (!logList) return;
-    logList.innerHTML = '';
-    
-    const filteredLogs = logs.filter(log => isInPeriod(log.date, activeFilter));
-
-    // 1. Calorieën berekenen
-    const totaalKcal = filteredLogs
-        .filter(log => log.category === 'Voeding')
-        .reduce((sum, log) => sum + Number(log.amount), 0);
-    if (statKcal) statKcal.innerText = totaalKcal;
-
-    // 2. Stappen berekenen
-    const totaalSteps = filteredLogs
-        .filter(log => log.category === 'Stappen')
-        .reduce((sum, log) => sum + Number(log.amount), 0);
-    if (statSteps) statSteps.innerText = totaalSteps.toLocaleString('nl-NL');
-
-    // 3. Hartslag berekenen
-    const hartslagLogs = filteredLogs.filter(log => log.category === 'Hartslag');
-    const laatsteBpm = hartslagLogs.length > 0 ? hartslagLogs[hartslagLogs.length - 1].amount : 0;
-    if (statBpm) statBpm.innerText = laatsteBpm;
-
-    // AI aanroepen
-    const lastLog = filteredLogs[filteredLogs.length - 1];
-    if (aiAdvice && typeof getSmartAdvice === 'function') {
-        aiAdvice.innerHTML = getSmartAdvice(lastLog, profile, currentLang);
-    }
-
-    if (filteredLogs.length === 0) {
-        logList.innerHTML = `<p style="color:#8e8e93; font-size:0.9rem; text-align:center;">${vertalingen[currentLang].noLogs}</p>`;
-        return;
-    }
-
-    filteredLogs.forEach(log => {
-        const div = document.createElement('div');
-        div.className = 'log-item';
-        // Flexbox aangepast zodat de prullenbak netjes rechts staat en alles verticaal gecentreerd is
-        div.style.display = 'flex'; 
-        div.style.justifyContent = 'space-between'; 
-        div.style.alignItems = 'center'; 
-        div.style.padding = '12px 0'; 
-        div.style.borderBottom = '1px solid #2c2c2e';
-        
-        div.innerHTML = `
-            <div>
-                <span style="font-weight:700; color:#ccff00;">${log.description}</span>
-                <p style="font-size:0.75rem; color:#8e8e93;">${log.date} • ${log.category}</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <span style="font-weight:700;">${log.amount} ${log.unit}</span>
-                <button class="btn-delete" style="background: none; border: none; color: #ff453a; cursor: pointer; font-size: 1.1rem; padding: 4px 8px; transition: transform 0.1s;">🗑️</button>
-            </div>
-        `;
-
-        // Klik-event koppelen aan de specifieke prullenbak
-        const deleteBtn = div.querySelector('.btn-delete');
-        deleteBtn.addEventListener('click', () => {
-            const vraag = currentLang === 'EN' 
-                ? "Are you sure you want to delete this log?" 
-                : "Weet je zeker dat je deze log wilt verwijderen?";
-                
-            if (confirm(vraag)) {
-                deleteLog(log.id);
-            }
-        });
-
-        logList.appendChild(div);
-    });
-}
-
-healthForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const newLog = {
-        id: Date.now(),
-        date: document.getElementById('input-date').value,
-        category: document.getElementById('input-category').value,
-        description: document.getElementById('input-desc').value,
-        amount: document.getElementById('input-amount').value,
-        unit: document.getElementById('input-unit').value,
-        intensity: document.getElementById('input-intensity').value
-    };
-    logs.push(newLog);
-    localStorage.setItem('gymLogs', JSON.stringify(logs));
-    healthForm.reset();
+    // Render alles voor de eerste start
+    vertaalApp(currentLang);
     renderLogs();
-    document.querySelector('[data-target="screen-dashboard"]').click();
 });
 
-btnSaveProfile.addEventListener('click', function() {
-    let profile = JSON.parse(localStorage.getItem('gymLockProfile')) || {
-        height: 0,
-        weight: 0,
-        age: 0,
-        frequency: '3-4'
-    };
+function switchView(viewId, navBtn) {
+    // Verberg alle views
+    document.querySelectorAll('.app-view').forEach(view => view.classList.add('hidden'));
+    // Toon geselecteerde view
+    document.getElementById(`view-${viewId}`).classList.remove('hidden');
 
-    // Profiel opslaan functie
-    function saveProfile() {
-        const height = Number(document.getElementById('profile-height').value);
-        const weight = Number(document.getElementById('profile-weight').value);
-        const age = Number(document.getElementById('profile-age').value);
-        const frequency = document.getElementById('profile-frequency').value;
+    // Update actieve knop in navigatie
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+    navBtn.classList.add('active');
 
-        profile = { height, weight, age, frequency };
-        localStorage.setItem('gymLockProfile', JSON.stringify(profile));
-        
-        // Genereer direct een nieuw trainingsprogramma op basis van deze data
-        generateWorkoutProgram();
-        renderLogs();
+    // Als we naar het dashboard gaan, forceer een chart redraw om sizing-bugs te voorkomen
+    if (viewId === 'dashboard') {
+        setTimeout(updateChart, 50);
     }
-});
-
-filterButtons.forEach(btn => {
-    btn.addEventListener('click', function() {
-        filterButtons.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        activeFilter = this.getAttribute('data-filter');
-        renderLogs();
-    });
-});
-
-btnReset.addEventListener('click', function() {
-    if (confirm(vertalingen[currentLang].resetVraag)) {
-        logs = []; profile = null;
-        localStorage.removeItem('gymLogs');
-        localStorage.removeItem('gymProfile');
-        inputHeight.value = ''; inputWeight.value = '';
-        renderLogs();
-    }
-});
-
-if (btnNl && btnEn) {
-    if (currentLang === 'EN') {
-        btnEn.classList.add('active');
-        btnNl.classList.remove('active');
-    } else {
-        btnNl.classList.add('active');
-        btnEn.classList.remove('active');
-    }
-
-    btnNl.addEventListener('click', () => {
-        btnNl.classList.add('active');
-        btnEn.classList.remove('active');
-        currentLang = 'NL';
-        localStorage.setItem('gymLang', 'NL');
-        vertaalApp('NL');
-        renderLogs();
-    });
-
-    btnEn.addEventListener('click', () => {
-        btnEn.classList.add('active');
-        btnNl.classList.remove('active');
-        currentLang = 'EN';
-        localStorage.setItem('gymLang', 'EN');
-        vertaalApp('EN');
-        renderLogs();
-    });
 }
 
-function generateWorkoutProgram() {
-    if (!profile.height || !profile.weight || !profile.age) return null;
-
-    const heightInMeters = profile.height / 100;
-    const bmi = profile.weight / (heightInMeters * heightInMeters);
-    let goal = "Kracht & Conditie";
-    let split = "Full Body";
-    let focus = "Algemene fitheid";
-
-    // Bepaal het doel op basis van BMI
-    if (bmi < 18.5) {
-        goal = "Hypertrofie (Spiermassa opbouwen)";
-        focus = "Progressive overload en calorie-overschot";
-    } else if (bmi >= 25) {
-        goal = "Vetverlies & Definitie";
-        focus = "Cardio-intervallen gecombineerd met krachttraining";
-    }
-
-    // Bepaal de trainingsverdeling op basis van frequentie
-    if (profile.frequency === '3-4') {
-        split = "Upper / Lower Split of Push / Pull / Legs";
-    } else if (profile.frequency === '5+') {
-        split = "Gespecialiseerde Split (Borst/Rug, Armen/Schouders, Benen)";
-    }
-
-    const program = {
-        title: `GymLock Custom Program`,
-        goal: goal,
-        split: split,
-        focus: focus,
-        intensity: profile.age > 45 ? "Gedoseerd (Focus op herstel)" : "High Intensity"
-    };
-
-    localStorage.setItem('gymLockProgram', JSON.stringify(program));
-    return program;
+// ================= VERTAAL ENGINE =================
+function toggleLanguage() {
+    currentLang = currentLang === 'NL' ? 'EN' : 'NL';
+    localStorage.setItem('gymLockLang', currentLang);
+    vertaalApp(currentLang);
+    renderLogs();
 }
 
 function vertaalApp(taal) {
-    const t = vertalingen[taal];
+    const t = info[taal];
+    document.getElementById('btn-lang-toggle').innerText = taal === 'NL' ? 'EN' : 'NL';
 
-    // 1. Hoofdkoppen (H2's)
-    const dashboardKop = document.querySelector('#screen-dashboard h2') || document.querySelector('.main-content h2');
-    const logKop = document.querySelector('#screen-log h2') || document.querySelectorAll('h2')[1];
-    const settingsKop = document.querySelector('#screen-settings h2');
-    
-    if (dashboardKop) dashboardKop.innerText = t.dashboardKop;
-    if (logKop) logKop.innerText = t.logKop;
-    if (settingsKop) settingsKop.innerText = t.settingsKop;
+    // Koppelen aan alle HTML IDs
+    document.getElementById('title-chart').innerText = t.titleChart;
+    document.getElementById('sub-chart').innerText = t.subChart;
+    document.getElementById('title-add-log').innerText = t.titleAddLog;
+    document.getElementById('sub-add-log').innerText = t.subAddLog;
+    document.getElementById('label-category').innerText = t.labelCategory;
+    document.getElementById('label-amount').innerText = t.labelAmount;
+    document.getElementById('label-date').innerText = t.labelDate;
+    document.getElementById('btn-submit-log').innerText = t.btnSubmitLog;
+    document.getElementById('title-history').innerText = t.titleHistory;
+    document.getElementById('sub-history').innerText = t.subHistory;
+    document.getElementById('title-profile-card').innerText = t.titleProfileCard;
+    document.getElementById('sub-profile-card').innerText = t.subProfileCard;
+    document.getElementById('label-height').innerText = t.labelLengte;
+    document.getElementById('label-weight').innerText = t.labelGewicht;
+    document.getElementById('label-age').innerText = t.labelAge;
+    document.getElementById('label-frequency').innerText = t.labelFrequency;
+    document.getElementById('btn-save-profile').innerText = t.btnOpslaan;
+    document.getElementById('title-data-management').innerText = t.dataKop;
+    document.getElementById('text-clear-data').innerText = t.textClearData;
+    document.getElementById('btn-reset-data').innerText = t.btnReset;
+    document.getElementById('nav-dashboard').innerText = t.navDashboard;
+    document.getElementById('nav-logs').innerText = t.navLogs;
+    document.getElementById('nav-settings').innerText = t.navSettings;
 
-    // 2. Settings subkoppen (H3's)
-    const settingsH3s = document.querySelectorAll('#screen-settings h3');
-    if (settingsH3s.length >= 3) {
-        settingsH3s[0].innerText = t.profielKop;
-        settingsH3s[1].innerText = t.taalKop;
-        settingsH3s[2].innerText = t.dataKop;
-    }
-
-    // 3. Settings Labels en Knoppen
-    const labelLengte = document.querySelector('label[for="profile-height"]') || document.querySelectorAll('#screen-settings label')[0];
-    const labelGewicht = document.querySelector('label[for="profile-weight"]') || document.querySelectorAll('#screen-settings label')[1];
-    if (labelLengte) labelLengte.innerText = t.labelLengte;
-    if (labelGewicht) labelGewicht.innerText = t.labelGewicht;
-    if (btnSaveProfile) btnSaveProfile.innerText = t.btnOpslaan;
-    if (btnReset) btnReset.innerText = t.btnReset;
-
-    // 4. Log Formulier Labels + Opslaan Knop
-    const labelsForm = document.querySelectorAll('#health-form label');
-    if (labelsForm.length >= 6) {
-        labelsForm[0].innerText = t.labelDatum;
-        labelsForm[1].innerText = t.labelCategorie;
-        labelsForm[2].innerText = t.labelOmschrijving;
-        labelsForm[3].innerText = t.labelAantal;
-        labelsForm[4].innerText = t.labelEenheid;
-        labelsForm[5].innerText = t.labelIntensiteit;
-    }
-    const btnSubmit = document.getElementById('health-form').querySelector('button');
-    if (btnSubmit) btnSubmit.innerText = t.btnLogOpslaan;
-
-    // 5. NIEUW: Dashboard Periode Filters (Dag / Week / Maand)
-    filterButtons.forEach(btn => {
-        const filterType = btn.getAttribute('data-filter');
-        if (filterType === 'day') btn.innerText = t.filterDay;
-        if (filterType === 'week') btn.innerText = t.filterWeek;
-        if (filterType === 'month') btn.innerText = t.filterMonth;
+    // Vertaal de dropdown opties van categorieën live mee
+    const catSelect = document.getElementById('input-category');
+    Array.from(catSelect.options).forEach(opt => {
+        if (opt.value === 'Krachttraining') opt.innerText = taal === 'EN' ? 'Strength Training' : 'Krachttraining';
+        if (opt.value === 'Voeding') opt.innerText = taal === 'EN' ? 'Nutrition' : 'Voeding';
+        if (opt.value === 'Stappen') opt.innerText = taal === 'EN' ? 'Steps' : 'Stappen';
+        if (opt.value === 'Hartslag') opt.innerText = taal === 'EN' ? 'Heart Rate' : 'Hartslag';
+        if (opt.value === 'Gewicht') opt.innerText = taal === 'EN' ? 'Weight (kg)' : 'Gewicht (kg)';
     });
 
-    // 6. NIEUW: Categorie Dropdown Opties live vertalen
-    const selectCategory = document.getElementById('input-category');
-    if (selectCategory) {
-        Array.from(selectCategory.options).forEach(opt => {
-            if (opt.value === 'Krachttraining') opt.innerText = t.optKrachttraining;
-            if (opt.value === 'Cardio') opt.innerText = t.optCardio;
-            if (opt.value === 'Voeding') opt.innerText = t.optVoeding;
-            if (opt.value === 'Stappen') opt.innerText = t.optStappen;
-            if (opt.value === 'Hartslag') opt.innerText = t.optHartslag;
-        });
-    }
-
-    // 7. NIEUW: Intensiteit Dropdown Opties live vertalen
-    const selectIntensity = document.getElementById('input-intensity');
-    if (selectIntensity) {
-        Array.from(selectIntensity.options).forEach(opt => {
-            if (opt.value === 'Zwaar') opt.innerText = taal === 'EN' ? 'Heavy / High' : 'Zwaar';
-            if (opt.value === 'Gemiddeld') opt.innerText = taal === 'EN' ? 'Moderate' : 'Gemiddeld';
-            if (opt.value === 'Licht') opt.innerText = taal === 'EN' ? 'Light' : 'Licht';
-        });
-    }
-
-    // 8. ONDERDEEL: Profiel en Data Beheer kaarten live vertalen
-    // Haal de vertaalset (t) op voor de huidige taal (bijv. info[taal] of hoe jouw variabele bovenin heet)
-    // In jouw code zagen we dat 't' wordt gebruikt, dus we hergebruiken dat hier:
-    const t = info[taal]; 
-
-    if (t) {
-        // Vertaal de labels van het profiel
-        const labelLengte = document.getElementById('label-lengte') || document.querySelector('label[for="input-height"]');
-        if (labelLengte) labelLengte.innerText = t.labelLengte;
-
-        const labelGewicht = document.getElementById('label-gewicht') || document.querySelector('label[for="input-weight"]');
-        if (labelGewicht) labelGewicht.innerText = t.labelGewicht;
-
-        // Vertaal de knoppen
-        const btnOpslaan = document.getElementById('btn-save-profile') || document.querySelector('.profile-card button');
-        if (btnOpslaan) btnOpslaan.innerText = t.btnOpslaan;
-
-        const btnReset = document.getElementById('btn-reset-data') || document.getElementById('reset-btn');
-        if (btnReset) btnReset.innerText = t.btnReset;
-
-        // Vertaal de kaarttitels (zoals Data Management)
-        const dataKop = document.getElementById('title-data-management') || document.querySelector('.data-card h3');
-        if (dataKop) dataKop.innerText = t.dataKop;
-    }
-
-    // 9. Settings omschrijving tekstje
-    const paragraphs = document.querySelectorAll('.settings-card p');
-    paragraphs.forEach(p => {
-        p.innerText = taal === 'EN' ? "Want to clear all saved data?" : "Wil je alle opgeslagen gegevens wissen?";
-    });
+    generateAndRenderWorkout();
 }
 
-// Log Verwijderen (Delete)
-function deleteLog(id) {
-    logs = logs.filter(log => log.id !== id);
-    localStorage.setItem('gymLogs', JSON.stringify(logs));
+// ================= LOG MANAGEMENT & GRAFIEK LOGICA =================
+function addNewLog() {
+    const category = document.getElementById('input-category').value;
+    const amount = document.getElementById('input-amount').value;
+    const date = document.getElementById('input-date').value;
+
+    const newLog = { id: Date.now(), category, amount, date };
+    logs.push(newLog);
+    localStorage.setItem('gymLockLogs', JSON.stringify(logs));
+
+    document.getElementById('input-amount').value = '';
     renderLogs();
 }
 
-vertaalApp(currentLang);
-renderLogs();
+function deleteLog(id) {
+    logs = logs.filter(log => log.id !== id);
+    localStorage.setItem('gymLockLogs', JSON.stringify(logs));
+    renderLogs();
+}
 
-// Service Worker Registratie voor PWA
+function renderLogs() {
+    const listContainer = document.getElementById('log-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
+
+    // Sorteer de logs op datum (nieuwste bovenaan)
+    const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sortedLogs.forEach(log => {
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        
+        // Vertaal categorie naam in de lijst
+        let displayCat = log.category;
+        if (currentLang === 'EN') {
+            if (log.category === 'Krachttraining') displayCat = 'Strength';
+            if (log.category === 'Voeding') displayCat = 'Nutrition';
+            if (log.category === 'Stappen') displayCat = 'Steps';
+            if (log.category === 'Hartslag') displayCat = 'Heart Rate';
+            if (log.category === 'Gewicht') displayCat = 'Weight';
+        }
+
+        item.innerHTML = `
+            <div>
+                <div class="log-meta">${log.date}</div>
+                <div class="log-title">${displayCat}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span class="log-value">${log.amount}</span>
+                <button class="btn-delete" onclick="deleteLog(${log.id})">X</button>
+            </div>
+        `;
+        listContainer.appendChild(item);
+    });
+
+    // Update direct de grafiek en het trainingsprogramma
+    updateChart();
+    generateAndRenderWorkout();
+}
+
+function updateChart() {
+    const canvas = document.getElementById('progressChart');
+    if (!canvas) return;
+
+    const weightLogs = logs
+        .filter(log => log.category === 'Gewicht')
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const labels = weightLogs.map(log => {
+        const d = new Date(log.date);
+        return `${d.getDate()}-${d.getMonth() + 1}`;
+    });
+    const dataValues = weightLogs.map(log => Number(log.amount));
+
+    if (progressChart) {
+        progressChart.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    progressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: dataValues,
+                borderColor: '#ccff00',
+                backgroundColor: 'rgba(204, 255, 0, 0.05)',
+                borderWidth: 2,
+                pointBackgroundColor: '#ccff00',
+                pointRadius: 4,
+                tension: 0.15,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { color: '#242429' }, ticks: { color: '#8e8e93', font: { family: 'Inter', size: 10 } } },
+                y: { grid: { color: '#242429' }, ticks: { color: '#8e8e93', font: { family: 'Inter', size: 10 } } }
+            }
+        }
+    });
+}
+
+// ================= ALGORITMISCH TRAININGSPROGRAMMA =================
+function generateAndRenderWorkout() {
+    const container = document.getElementById('workout-program-container');
+    if (!container) return;
+
+    if (!profile.height || !profile.weight || !profile.age) {
+        container.innerHTML = `
+            <div class="dashboard-card">
+                <h3>${currentLang === 'EN' ? 'Workout Program' : 'Trainingsprogramma'}</h3>
+                <p class="subtitle">${currentLang === 'EN' ? 'Complete your profile in Settings to generate a specialized routine.' : 'Vul je profielgegevens in bij Instellingen om een gepersonaliseerd schema te genereren.'}</p>
+            </div>
+        `;
+        return;
+    }
+
+    const heightInMeters = profile.height / 100;
+    const bmi = (profile.weight / (heightInMeters * heightInMeters)).toFixed(1);
+    
+    let doel = currentLang === 'EN' ? "Strength & Conditioning" : "Kracht & Conditie";
+    let focus = currentLang === 'EN' ? "Focus on progressive overload and general fitness enhancement." : "Progressive overload en algemene fitheid verbeteren.";
+    let split = currentLang === 'EN' ? "Full Body (3x / week)" : "Full Body (3x per week)";
+
+    if (bmi < 18.5) {
+        doel = currentLang === 'EN' ? "Hypertrophy (Muscle Mass Building)" : "Hypertrofie (Spiermassa Opbouw)";
+        focus = currentLang === 'EN' ? "Focus on compound mechanics, steady weight increases, and a caloric surplus." : "Focus on compound oefeningen, progressieve belasting en een calorie-overschot.";
+    } else if (bmi >= 25.0) {
+        doel = currentLang === 'EN' ? "Recomposition & Fat Loss" : "Recompositie & Vetverlies";
+        focus = currentLang === 'EN' ? "Preserving motor units via heavy resistance training coupled with a controlled energy deficit." : "Behoud van spiermassa middels krachttraining gecombineerd met een gecontroleerd calorietekort.";
+    }
+
+    if (profile.frequency === '3-4') {
+        split = currentLang === 'EN' ? "Upper / Lower Split (4x / week)" : "Upper / Lower Split (4x per week)";
+    } else if (profile.frequency === '5+') {
+        split = currentLang === 'EN' ? "Push / Pull / Legs Split (5-6x / week)" : "Push / Pull / Legs Split (5-6x per week)";
+    }
+
+    let intensiteit = currentLang === 'EN' ? "High Intensity (Maximum Output)" : "High Intensity (Maximale output)";
+    if (profile.age > 40) {
+        intensiteit = currentLang === 'EN' ? "Regulated Intensity (Recovery Oriented)" : "Gereguleerde Intensiteit (Focus op herstel)";
+    }
+
+    container.innerHTML = `
+        <div class="dashboard-card">
+            <h3>${currentLang === 'EN' ? 'Custom Routine' : 'Gepersonaliseerd Trainingsprogramma'}</h3>
+            <p class="subtitle">${currentLang === 'EN' ? 'Generated using real fysiometrics' : 'Gegenereerd op basis van actuele fysiometrie'}</p>
+            
+            <div style="margin-bottom: 12px;">
+                <label>${currentLang === 'EN' ? 'Goal' : 'Doelstelling'}</label>
+                <p style="font-weight: 600; font-size: 1.1rem; color: var(--accent);">${doel}</p>
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <label>${currentLang === 'EN' ? 'Routine Split' : 'Routine Verdeling'}</label>
+                <p style="font-weight: 500;">${split}</p>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label>${currentLang === 'EN' ? 'Intensity Threshold' : 'Intensiteit Niveau'}</label>
+                <p style="font-weight: 500;">${intensiteit}</p>
+            </div>
+            
+            <div>
+                <label>Focus</label>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.4;">${focus}</p>
+            </div>
+        </div>
+    `;
+}
+
+// ================= DATA EN INSTELLINGEN OPSLAAN =================
+function saveProfile() {
+    profile = {
+        height: Number(document.getElementById('profile-height').value),
+        weight: Number(document.getElementById('profile-weight').value),
+        age: Number(document.getElementById('profile-age').value),
+        frequency: document.getElementById('profile-frequency').value
+    };
+
+    localStorage.setItem('gymLockProfile', JSON.stringify(profile));
+    generateAndRenderWorkout();
+    updateChart();
+    alert(info[currentLang].msgSaved);
+}
+
+function resetAllData() {
+    if (confirm(info[currentLang].msgResetConfirm)) {
+        localStorage.clear();
+        logs = [];
+        profile = { height: 0, weight: 0, age: 0, frequency: '3-4' };
+        
+        document.getElementById('profile-height').value = '';
+        document.getElementById('profile-weight').value = '';
+        document.getElementById('profile-age').value = '';
+        document.getElementById('profile-frequency').value = '3-4';
+
+        renderLogs();
+    }
+}
+
+// ================= SERVICE WORKER REGISTRATIE =================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker succesvol geregistreerd!', reg))
-            .catch(err => console.error('Service Worker registratie mislukt:', err));
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker geregistreerd!', reg))
+            .catch(err => console.error('Service Worker faal:', err));
     });
 }
