@@ -3,11 +3,11 @@ const CACHE_NAME = 'gymlock-cache-v1';
 const ASSETS = [
   './',
   './index.html',
-  './styles/style.css',
+  './css/style.css',
   './script/app.js',
   './script/ai-coach.js',
   './manifest.json',
-  './icons/icon-192x192.png',
+  './icons/icon_GymLock2.png',
   './icons/icon_GymLock.png'
 ];
 

@@ -80,6 +80,37 @@ h1, h2, h3, h4 {
     padding-left: 10px;
 }
 
+/* Oefening/Routine Dagopmaak */
+.workout-day-box {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sharp);
+    padding: 14px;
+    margin-top: 12px;
+}
+
+.workout-day-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.workout-day-body {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.workout-day-details {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
 .form-group {
     margin-bottom: 16px;
 }
@@ -199,12 +230,13 @@ input:focus, select:focus {
     color: #ff453a;
 }
 
+/* Navigatiebalk met SVG ondersteuning */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 64px;
+    height: 68px;
     background-color: #111113;
     border-top: 1px solid var(--border-color);
     display: flex;
@@ -217,10 +249,21 @@ input:focus, select:focus {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+}
+
+.nav-item svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
 }
 
 .nav-item.active {
