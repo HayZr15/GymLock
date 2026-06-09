@@ -336,7 +336,32 @@ function vertaalApp(taal) {
         });
     }
 
-    // 8. Settings omschrijving tekstje
+    // 8. ONDERDEEL: Profiel en Data Beheer kaarten live vertalen
+    // Haal de vertaalset (t) op voor de huidige taal (bijv. info[taal] of hoe jouw variabele bovenin heet)
+    // In jouw code zagen we dat 't' wordt gebruikt, dus we hergebruiken dat hier:
+    const t = info[taal]; 
+
+    if (t) {
+        // Vertaal de labels van het profiel
+        const labelLengte = document.getElementById('label-lengte') || document.querySelector('label[for="input-height"]');
+        if (labelLengte) labelLengte.innerText = t.labelLengte;
+
+        const labelGewicht = document.getElementById('label-gewicht') || document.querySelector('label[for="input-weight"]');
+        if (labelGewicht) labelGewicht.innerText = t.labelGewicht;
+
+        // Vertaal de knoppen
+        const btnOpslaan = document.getElementById('btn-save-profile') || document.querySelector('.profile-card button');
+        if (btnOpslaan) btnOpslaan.innerText = t.btnOpslaan;
+
+        const btnReset = document.getElementById('btn-reset-data') || document.getElementById('reset-btn');
+        if (btnReset) btnReset.innerText = t.btnReset;
+
+        // Vertaal de kaarttitels (zoals Data Management)
+        const dataKop = document.getElementById('title-data-management') || document.querySelector('.data-card h3');
+        if (dataKop) dataKop.innerText = t.dataKop;
+    }
+
+    // 9. Settings omschrijving tekstje
     const paragraphs = document.querySelectorAll('.settings-card p');
     paragraphs.forEach(p => {
         p.innerText = taal === 'EN' ? "Want to clear all saved data?" : "Wil je alle opgeslagen gegevens wissen?";
