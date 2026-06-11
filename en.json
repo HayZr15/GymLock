@@ -1,0 +1,119 @@
+{
+  "titleChart": "Progress",
+  "subChart": "Weight distribution over time (Dynamic Scale)",
+  "titleAddLog": "Log Activity",
+  "subAddLog": "Enter your training or fysiometrics",
+  "labelCategory": "Category",
+  "labelDate": "Date",
+  "btnSubmitLog": "Save Log",
+  "titleHistory": "History",
+  "subHistory": "Your registered activities",
+  "titleProfileCard": "Profile",
+  "subProfileCard": "Your physiological attributes for scheduling",
+  "labelLengte": "Height (cm)",
+  "labelGewicht": "Weight (kg)",
+  "labelAge": "Age",
+  "labelFrequency": "Workouts per week",
+  "btnOpslaan": "Save Profile",
+  "dataKop": "Data Management",
+  "textClearData": "Want to clear all saved data?",
+  "btnReset": "Reset All Data",
+  "navDashboard": "Dashboard",
+  "navLogs": "Logs",
+  "navSettings": "Settings",
+  "msgSaved": "Profile updated successfully.",
+  "msgResetConfirm": "Are you sure you want to clear all data? This cannot be undone.",
+  "phHeight": "E.g., 180",
+  "phWeight": "E.g., 80",
+  "phAge": "E.g., 24",
+  "categories": {
+    "Krachttraining": "Strength Training",
+    "Cardio": "Cardio",
+    "Voeding": "Nutrition",
+    "Stappen": "Steps",
+    "Hartslag": "Heart Rate",
+    "Gewicht": "Weight"
+  },
+  "units": {
+    "kg": "kg",
+    "min": "min",
+    "kcal": "kcal",
+    "steps": "steps",
+    "bpm": "BPM"
+  },
+  "logLabels": {
+    "Krachttraining": {
+      "subtype": "Exercise / Muscle Group",
+      "subph": "E.g., Bench Press, Squats, Pull-ups",
+      "amount": "Weight (kg)",
+      "amountph": "E.g., 80"
+    },
+    "Cardio": {
+      "subtype": "Activity Type",
+      "subph": "E.g., Running, Cycling, Rowing",
+      "amount": "Duration (minutes)",
+      "amountph": "E.g., 45"
+    },
+    "Voeding": {
+      "subtype": "Product / Meal",
+      "subph": "E.g., Protein Shake, Chicken & Rice",
+      "amount": "Intake (kcal)",
+      "amountph": "E.g., 650"
+    },
+    "Stappen": {
+      "subtype": "Note (Optional)",
+      "subph": "E.g., Morning walk",
+      "amount": "Step Count",
+      "amountph": "E.g., 10000"
+    },
+    "Hartslag": {
+      "subtype": "State / Moment",
+      "subph": "E.g., Resting, Post-sprint",
+      "amount": "Heart Rate (BPM)",
+      "amountph": "E.g., 68"
+    },
+    "Gewicht": {
+      "subtype": "Note (Optional)",
+      "subph": "E.g., Fasting weight",
+      "amount": "Body Weight (kg)",
+      "amountph": "E.g., 78.4"
+    }
+  },
+  "workout": {
+    "titleEmpty": "Workout Program",
+    "subEmpty": "Complete your profile in Settings to generate a specialized routine.",
+    "titleCustom": "Custom Routine",
+    "subCustom": "Generated using real fysiometrics",
+    "targetGoal": "Target Goal",
+    "splitSystem": "Split System",
+    "dailyBreakdown": "Daily Split Breakdown",
+    "coreExercises": "Core exercises:",
+    "goals": {
+      "strength": "Strength & Conditioning",
+      "hypertrophy": "Hypertrophy (Mass Building)",
+      "fatloss": "Recomposition & Fat Loss",
+      "recovery": " (Recovery Oriented)"
+    },
+    "splits": {
+      "1-2": "Full Body (2x / week)",
+      "3-4": "Upper / Lower Split (4x / week)",
+      "5+": "Push / Pull / Legs Split (5-6x / week)"
+    },
+    "routines": {
+      "workoutA": "Workout A",
+      "workoutB": "Workout B",
+      "musclesA": "Chest, Back, Legs & Core",
+      "musclesB": "Shoulders, Arms, Posterior Chain",
+      "day13Upper": "Day 1 & 3: Upper Body",
+      "day24Lower": "Day 2 & 4: Lower Body",
+      "musclesUpper": "Chest, Back, Shoulders & Arms",
+      "musclesLower": "Quads, Hamstrings, Calves & Abs",
+      "day14Push": "Day 1 & 4: Push",
+      "day25Pull": "Day 2 & 5: Pull",
+      "day36Legs": "Day 3 & 6: Legs & Core",
+      "musclesPush": "Chest, Shoulders & Triceps",
+      "musclesPull": "Back, Rear Delts & Biceps",
+      "musclesLegs": "Quads, Hamstrings & Core Stability"
+    }
+  }
+}

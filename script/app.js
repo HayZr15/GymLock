@@ -2,6 +2,7 @@
 let logs = JSON.parse(localStorage.getItem('gymLockLogs')) || [];
 let progressChart = null;
 let currentLang = localStorage.getItem('gymLockLang') || 'NL';
+let info = { NL: null, EN: null }; // Wordt dynamisch gevuld vanuit JSON
 
 let profile = JSON.parse(localStorage.getItem('gymLockProfile')) || {
     height: 0,
@@ -10,64 +11,11 @@ let profile = JSON.parse(localStorage.getItem('gymLockProfile')) || {
     frequency: '3-4'
 };
 
-// ================= VERTAAL DICTIONARY =================
-const info = {
-    NL: {
-        titleChart: "Voortgang",
-        subChart: "Gewichtsverloop afgelopen periode (Dynamische Schaal)",
-        titleAddLog: "Activiteit Loggen",
-        subAddLog: "Voer je training of fysiometrie in",
-        labelCategory: "Categorie",
-        labelDate: "Datum",
-        btnSubmitLog: "Log Opslaan",
-        titleHistory: "Geschiedenis",
-        subHistory: "Je geregistreerde activiteiten",
-        titleProfileCard: "Profiel",
-        subProfileCard: "Je fysiologische eigenschappen voor het schema",
-        labelLengte: "Lengte (cm)",
-        labelGewicht: "Gewicht (kg)",
-        labelAge: "Leeftijd",
-        labelFrequency: "Trainingen per week",
-        btnOpslaan: "Profiel Opslaan",
-        dataKop: "Data Beheer",
-        textClearData: "Wil je alle opgeslagen gegevens wissen?",
-        btnReset: "Reset Alle Gegevens",
-        navDashboard: "Dashboard",
-        navLogs: "Logs",
-        navSettings: "Instellingen",
-        msgSaved: "Profiel succesvol bijgewerkt.",
-        msgResetConfirm: "Weet je zeker dat je alle data wilt wissen? Dit kan niet ongedaan worden gemaakt."
-    },
-    EN: {
-        titleChart: "Progress",
-        subChart: "Weight distribution over time (Dynamic Scale)",
-        titleAddLog: "Log Activity",
-        subAddLog: "Enter your training or fysiometrics",
-        labelCategory: "Category",
-        labelDate: "Date",
-        btnSubmitLog: "Save Log",
-        titleHistory: "History",
-        subHistory: "Your registered activities",
-        titleProfileCard: "Profile",
-        subProfileCard: "Your physiological attributes for scheduling",
-        labelLengte: "Height (cm)",
-        labelGewicht: "Weight (kg)",
-        labelAge: "Age",
-        labelFrequency: "Workouts per week",
-        btnOpslaan: "Save Profile",
-        dataKop: "Data Management",
-        textClearData: "Want to clear all saved data?",
-        btnReset: "Reset All Data",
-        navDashboard: "Dashboard",
-        navLogs: "Logs",
-        navSettings: "Settings",
-        msgSaved: "Profile updated successfully.",
-        msgResetConfirm: "Are you sure you want to clear all data? This cannot be undone."
-    }
-};
-
 // ================= APP INITIALISATIE & NAVIGATIE =================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Start direct met het laden van externe JSON-taalbestanden
+    await laadTaalBestanden();
+
     const dateInput = document.getElementById('input-date');
     if (dateInput) dateInput.valueAsDate = new Date();
 
@@ -78,10 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-lang-toggle').addEventListener('click', toggleLanguage);
 
+    // Koppel onchange event om labels direct mee te veranderen bij categorie-switch
+    document.getElementById('input-category').addEventListener('change', updateLogLabels);
+
     vertaalApp(currentLang);
-    updateLogLabels(); // Zet direct de juiste invoervelden klaar voor Krachttraining
     renderLogs();
 });
+
+// Asynchroon inladen van de JSON-bestanden uit de hoofdmap
+async function laadTaalBestanden() {
+    try {
+        const [resNL, resEN] = await Promise.all([
+            fetch('nl.json'),
+            fetch('en.json')
+        ]);
+        info.NL = await resNL.json();
+        info.EN = await resEN.json();
+    } catch (err) {
+        console.error("Fout bij het laden van externe JSON-taalbestanden:", err);
+    }
+}
 
 function switchView(viewId, navBtn) {
     document.querySelectorAll('.app-view').forEach(view => view.classList.add('hidden'));
@@ -97,92 +61,39 @@ function switchView(viewId, navBtn) {
 
 // ================= DYNAMISCHE EENHEDEN & LABELS PER CATEGORIE =================
 function updateLogLabels() {
+    if (!info[currentLang]) return;
+
     const cat = document.getElementById('input-category').value;
     const labelSubtype = document.getElementById('label-subtype');
     const inputSubtype = document.getElementById('input-subtype');
     const labelAmount = document.getElementById('label-amount');
     const inputAmount = document.getElementById('input-amount');
     
-    if (currentLang === 'NL') {
-        if (cat === 'Krachttraining') {
-            labelSubtype.innerText = "Oefening / Spiergroep";
-            inputSubtype.placeholder = "Bijv. Bench Press, Squats, Pull-ups";
-            labelAmount.innerText = "Gewicht (kg)";
-            inputAmount.placeholder = "Bijv. 80";
-        } else if (cat === 'Cardio') {
-            labelSubtype.innerText = "Type Activiteit";
-            inputSubtype.placeholder = "Bijv. Hardlopen, Wielrennen, Roeien";
-            labelAmount.innerText = "Duur (minuten)";
-            inputAmount.placeholder = "Bijv. 45";
-        } else if (cat === 'Voeding') {
-            labelSubtype.innerText = "Product / Maaltijd";
-            inputSubtype.placeholder = "Bijv. Eiwitshake, Kip met Rijst";
-            labelAmount.innerText = "Inname (kcal)";
-            inputAmount.placeholder = "Bijv. 650";
-        } else if (cat === 'Stappen') {
-            labelSubtype.innerText = "Opmerking (Optioneel)";
-            inputSubtype.placeholder = "Bijv. Ochtendwandeling";
-            labelAmount.innerText = "Aantal stappen";
-            inputAmount.placeholder = "Bijv. 10000";
-        } else if (cat === 'Hartslag') {
-            labelSubtype.innerText = "Toestand / Meetmoment";
-            inputSubtype.placeholder = "Bijv. In rust, Direct na sprint";
-            labelAmount.innerText = "Hartslag (BPM)";
-            inputAmount.placeholder = "Bijv. 68";
-        } else if (cat === 'Gewicht') {
-            labelSubtype.innerText = "Opmerking (Optioneel)";
-            inputSubtype.placeholder = "Bijv. Nuchter gewogen";
-            labelAmount.innerText = "Lichaamsgewicht (kg)";
-            inputAmount.placeholder = "Bijv. 78.4";
-        }
-    } else { // ENGELS
-        if (cat === 'Krachttraining') {
-            labelSubtype.innerText = "Exercise / Muscle Group";
-            inputSubtype.placeholder = "E.g., Bench Press, Squats, Pull-ups";
-            labelAmount.innerText = "Weight (kg)";
-            inputAmount.placeholder = "E.g., 80";
-        } else if (cat === 'Cardio') {
-            labelSubtype.innerText = "Activity Type";
-            inputSubtype.placeholder = "E.g., Running, Cycling, Rowing";
-            labelAmount.innerText = "Duration (minutes)";
-            inputAmount.placeholder = "E.g., 45";
-        } else if (cat === 'Voeding') {
-            labelSubtype.innerText = "Product / Meal";
-            inputSubtype.placeholder = "E.g., Protein Shake, Chicken & Rice";
-            labelAmount.innerText = "Intake (kcal)";
-            inputAmount.placeholder = "E.g., 650";
-        } else if (cat === 'Stappen') {
-            labelSubtype.innerText = "Note (Optional)";
-            inputSubtype.placeholder = "E.g., Morning walk";
-            labelAmount.innerText = "Step Count";
-            inputAmount.placeholder = "E.g., 10000";
-        } else if (cat === 'Hartslag') {
-            labelSubtype.innerText = "State / Moment";
-            inputSubtype.placeholder = "E.g., Resting, Post-sprint";
-            labelAmount.innerText = "Heart Rate (BPM)";
-            inputAmount.placeholder = "E.g., 68";
-        } else if (cat === 'Gewicht') {
-            labelSubtype.innerText = "Note (Optional)";
-            inputSubtype.placeholder = "E.g., Fasting weight";
-            labelAmount.innerText = "Body Weight (kg)";
-            inputAmount.placeholder = "E.g., 78.4";
-        }
+    const vertaalData = info[currentLang].logLabels[cat];
+
+    if (vertaalData) {
+        labelSubtype.innerText = vertaalData.subtype;
+        inputSubtype.placeholder = vertaalData.subph;
+        labelAmount.innerText = vertaalData.amount;
+        inputAmount.placeholder = vertaalData.amountph;
     }
 }
 
 // ================= VERTAAL ENGINE =================
-function toggleLanguage() {
+async function toggleLanguage() {
     currentLang = currentLang === 'NL' ? 'EN' : 'NL';
     localStorage.setItem('gymLockLang', currentLang);
     vertaalApp(currentLang);
-    updateLogLabels();
     renderLogs();
 }
 
 function vertaalApp(taal) {
     const t = info[taal];
+    if (!t) return; // Beveiliging als JSON nog niet binnen is
+
     document.getElementById('btn-lang-toggle').innerText = taal === 'NL' ? 'EN' : 'NL';
 
+    // Vertaal statische elementen en invoer-placeholders
     document.getElementById('title-chart').innerText = t.titleChart;
     document.getElementById('sub-chart').innerText = t.subChart;
     document.getElementById('title-add-log').innerText = t.titleAddLog;
@@ -206,16 +117,20 @@ function vertaalApp(taal) {
     document.getElementById('nav-logs').innerText = t.navLogs;
     document.getElementById('nav-settings').innerText = t.navSettings;
 
+    // Vertaal invoer-placeholders van de profielvelden
+    document.getElementById('profile-height').placeholder = t.phHeight;
+    document.getElementById('profile-weight').placeholder = t.phWeight;
+    document.getElementById('profile-age').placeholder = t.phAge;
+
+    // Vertaal de opties van de Categorie Dropdown
     const catSelect = document.getElementById('input-category');
     Array.from(catSelect.options).forEach(opt => {
-        if (opt.value === 'Krachttraining') opt.innerText = taal === 'EN' ? 'Strength Training' : 'Krachttraining';
-        if (opt.value === 'Cardio') opt.innerText = taal === 'EN' ? 'Cardio' : 'Cardio';
-        if (opt.value === 'Voeding') opt.innerText = taal === 'EN' ? 'Nutrition' : 'Voeding';
-        if (opt.value === 'Stappen') opt.innerText = taal === 'EN' ? 'Steps' : 'Stappen';
-        if (opt.value === 'Hartslag') opt.innerText = taal === 'EN' ? 'Heart Rate' : 'Hartslag';
-        if (opt.value === 'Gewicht') opt.innerText = taal === 'EN' ? 'Weight' : 'Gewicht';
+        if (t.categories[opt.value]) {
+            opt.innerText = t.categories[opt.value];
+        }
     });
 
+    updateLogLabels();
     generateAndRenderWorkout();
 }
 
@@ -235,34 +150,35 @@ function addNewLog() {
     renderLogs();
 }
 
-function deleteLog(id) {
+// Expose deleteLog to window scope globally for dynamic onclick handling
+window.deleteLog = function(id) {
     logs = logs.filter(log => log.id !== id);
     localStorage.setItem('gymLockLogs', JSON.stringify(logs));
     renderLogs();
-}
+};
 
 function renderLogs() {
     const listContainer = document.getElementById('log-list');
-    if (!listContainer) return;
+    if (!listContainer || !info[currentLang]) return;
     listContainer.innerHTML = '';
 
+    const t = info[currentLang];
     const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     sortedLogs.forEach(log => {
         const item = document.createElement('div');
         item.className = 'log-item';
         
-        let displayCat = log.category;
+        let displayCat = t.categories[log.category] || log.category;
         let unit = '';
 
-        if (log.category === 'Krachttraining') { displayCat = currentLang === 'EN' ? 'Strength' : 'Krachttraining'; unit = 'kg'; }
-        if (log.category === 'Cardio') { displayCat = 'Cardio'; unit = 'min'; }
-        if (log.category === 'Voeding') { displayCat = currentLang === 'EN' ? 'Nutrition' : 'Voeding'; unit = 'kcal'; }
-        if (log.category === 'Stappen') { displayCat = currentLang === 'EN' ? 'Steps' : 'Stappen'; unit = currentLang === 'EN' ? 'steps' : 'stappen'; }
-        if (log.category === 'Hartslag') { displayCat = currentLang === 'EN' ? 'Heart Rate' : 'Hartslag'; unit = 'BPM'; }
-        if (log.category === 'Gewicht') { displayCat = currentLang === 'EN' ? 'Weight' : 'Gewicht'; unit = 'kg'; }
+        if (log.category === 'Krachttraining') unit = t.units.kg;
+        if (log.category === 'Cardio') unit = t.units.min;
+        if (log.category === 'Voeding') unit = t.units.kcal;
+        if (log.category === 'Stappen') unit = t.units.steps;
+        if (log.category === 'Hartslag') unit = t.units.bpm;
+        if (log.category === 'Gewicht') unit = t.units.kg;
 
-        // Voeg de specifieke oefening/onderdeel toe aan de titel als deze bestaat
         let titleText = displayCat;
         if (log.subtype) {
             titleText += ` <span style="color: var(--text-muted); font-weight:400;">— ${log.subtype}</span>`;
@@ -275,7 +191,7 @@ function renderLogs() {
             </div>
             <div style="display: flex; align-items: center; gap: 16px;">
                 <span class="log-value">${log.amount} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">${unit}</span></span>
-                <button class="btn-delete" onclick="deleteLog(${log.id})">X</button>
+                <button class="btn-delete" onclick="window.deleteLog(${log.id})">X</button>
             </div>
         `;
         listContainer.appendChild(item);
@@ -304,8 +220,6 @@ function updateChart() {
     }
 
     const ctx = canvas.getContext('2d');
-    
-    // Premium Upgrade: Kleurverloop/Gradient onder de lijn toevoegen voor diepte
     const gradient = ctx.createLinearGradient(0, 0, 0, 240);
     gradient.addColorStop(0, 'rgba(204, 255, 0, 0.35)');
     gradient.addColorStop(1, 'rgba(204, 255, 0, 0.0)');
@@ -331,11 +245,7 @@ function updateChart() {
             plugins: { legend: { display: false } },
             scales: {
                 x: { grid: { color: '#242429' }, ticks: { color: '#8e8e93', font: { family: 'Inter', size: 10 } } },
-                y: { 
-                    grid: { color: '#242429' }, 
-                    ticks: { color: '#8e8e93', font: { family: 'Inter', size: 10 } },
-                    beginAtZero: false // FIX: Haalt de grafiek van het nulpunt af om platte lijnen te voorkomen!
-                }
+                y: { grid: { color: '#242429' }, ticks: { color: '#8e8e93', font: { family: 'Inter', size: 10 } }, beginAtZero: false }
             }
         }
     });
@@ -344,13 +254,15 @@ function updateChart() {
 // ================= ALGORITMISCH TRAININGSPROGRAMMA MET EXPLICIETE DAGROUTINES =================
 function generateAndRenderWorkout() {
     const container = document.getElementById('workout-program-container');
-    if (!container) return;
+    if (!container || !info[currentLang]) return;
+
+    const t = info[currentLang].workout;
 
     if (!profile.height || !profile.weight || !profile.age) {
         container.innerHTML = `
             <div class="dashboard-card">
-                <h3>${currentLang === 'EN' ? 'Workout Program' : 'Trainingsprogramma'}</h3>
-                <p class="subtitle">${currentLang === 'EN' ? 'Complete your profile in Settings to generate a specialized routine.' : 'Vul je profielgegevens in bij Instellingen om een gepersonaliseerd schema te genereren.'}</p>
+                <h3>${t.titleEmpty}</h3>
+                <p class="subtitle">${t.subEmpty}</p>
             </div>
         `;
         return;
@@ -359,104 +271,76 @@ function generateAndRenderWorkout() {
     const heightInMeters = profile.height / 100;
     const bmi = (profile.weight / (heightInMeters * heightInMeters)).toFixed(1);
     
-    let doel = currentLang === 'EN' ? "Strength & Conditioning" : "Kracht & Conditie";
-    let splitName = currentLang === 'EN' ? "Full Body" : "Full Body Routine";
+    let doel = t.goals.strength;
+    let splitName = t.splits[profile.frequency] || t.splits['3-4'];
     let routines = [];
 
-    // Bepalen van de specifieke dagroutines op basis van de ingevulde sportfrequentie
     if (profile.frequency === '1-2') {
-        splitName = currentLang === 'EN' ? "Full Body (2x / week)" : "Full Body (2x per week)";
         routines = [
-            { 
-                dag: currentLang === 'EN' ? "Workout A" : "Training A", 
-                spieren: currentLang === 'EN' ? "Chest, Back, Legs & Core" : "Borst, Rug, Benen & Buik", 
-                oefeningen: "Squats, Bench Press, Lat Pulldowns, Planks (4 sets x 8-12 reps)" 
-            },
-            { 
-                dag: currentLang === 'EN' ? "Workout B" : "Training B", 
-                spieren: currentLang === 'EN' ? "Shoulders, Arms, Posterior Chain" : "Schouders, Armen & Achterkant Benen", 
-                oefeningen: "Deadlifts, Overhead Press, Bicep Curls, Tricep Pushdowns (4 sets x 8-12 reps)" 
-            }
+            { dag: t.routines.workoutA, spieren: t.routines.musclesA, oefeningen: "Squats, Bench Press, Lat Pulldowns, Planks (4 sets x 8-12 reps)" },
+            { dag: t.routines.workoutB, spieren: t.routines.musclesB, oefeningen: "Deadlifts, Overhead Press, Bicep Curls, Tricep Pushdowns (4 sets x 8-12 reps)" }
         ];
     } else if (profile.frequency === '3-4') {
-        splitName = currentLang === 'EN' ? "Upper / Lower Split (4x / week)" : "Upper / Lower Split (4x per week)";
         routines = [
-            { 
-                dag: currentLang === 'EN' ? "Day 1 & 3: Upper Body" : "Dag 1 & 3: Bovenlichaam", 
-                spieren: currentLang === 'EN' ? "Chest, Back, Shoulders & Arms" : "Borst, Rug, Schouders & Armen", 
-                oefeningen: "Bench Press, Barbell Rows, Dumbbell Shoulder Press, Pull-ups" 
-            },
-            { 
-                dag: currentLang === 'EN' ? "Day 2 & 4: Lower Body" : "Dag 2 & 4: Onderlichaam", 
-                spieren: currentLang === 'EN' ? "Quads, Hamstrings, Calves & Abs" : "Quadriceps, Hamstrings, Kuiten & Buik", 
-                oefeningen: "Leg Press, Romanian Deadlifts, Calf Raises, Hanging Leg Raises" 
-            }
+            { dag: t.routines.day13Upper, spieren: t.routines.musclesUpper, oefeningen: "Bench Press, Barbell Rows, Dumbbell Shoulder Press, Pull-ups" },
+            { dag: t.routines.day24Lower, spieren: t.routines.musclesLower, oefeningen: "Leg Press, Romanian Deadlifts, Calf Raises, Hanging Leg Raises" }
         ];
     } else if (profile.frequency === '5+') {
-        splitName = currentLang === 'EN' ? "Push / Pull / Legs Split (5-6x / week)" : "Push / Pull / Legs Split (5-6x per week)";
         routines = [
-            { 
-                dag: currentLang === 'EN' ? "Day 1 & 4: Push" : "Dag 1 & 4: Push (Duwen)", 
-                spieren: currentLang === 'EN' ? "Chest, Shoulders & Triceps" : "Borst, Schouders & Triceps", 
-                oefeningen: "Incline Dumbbell Press, Overhead Press, Lateral Raises, Cable Tricep Extensions" 
-            },
-            { 
-                dag: currentLang === 'EN' ? "Day 2 & 5: Pull" : "Dag 2 & 5: Pull (Treken)", 
-                spieren: currentLang === 'EN' ? "Back, Rear Delts & Biceps" : "Rug, Achterkant Schouders & Biceps", 
-                oefeningen: "Barbell Rows, Face Pulls, Incline Bicep Curls, Hammer Curls" 
-            },
-            { 
-                dag: currentLang === 'EN' ? "Day 3 & 6: Legs & Core" : "Dag 3 & 6: Legs (Benen & Buik)", 
-                spieren: currentLang === 'EN' ? "Quads, Hamstrings & Core Stability" : "Bovenbenen, Hamstrings & Buikspieren", 
-                oefeningen: "Barbell Squats, Bulgarian Split Squats, Leg Curls, Ab Wheel Rollouts" 
-            }
+            { dag: t.routines.day14Push, spieren: t.routines.musclesPush, oefeningen: "Incline Dumbbell Press, Overhead Press, Lateral Raises, Cable Tricep Extensions" },
+            { dag: t.routines.day25Pull, spieren: t.routines.musclesPull, oefeningen: "Barbell Rows, Face Pulls, Incline Bicep Curls, Hammer Curls" },
+            { dag: t.routines.day36Legs, spieren: t.routines.musclesLegs, oefeningen: "Barbell Squats, Bulgarian Split Squats, Leg Curls, Ab Wheel Rollouts" }
         ];
     }
 
-    // Fysiologische finetuning op basis van BMI en Leeftijd
     if (bmi < 18.5) {
-        doel = currentLang === 'EN' ? "Hypertrophy (Mass Building)" : "Hypertrofie (Spiermassa Opbouw)";
+        doel = t.goals.hypertrophy;
     } else if (bmi >= 25.0) {
-        doel = currentLang === 'EN' ? "Recomposition & Fat Loss" : "Recompositie & Vetverlies";
+        doel = t.goals.fatloss;
     }
 
     if (profile.age > 40) {
-        doel += currentLang === 'EN' ? " (Recovery Oriented)" : " (Focus op Gewrichtsherstel)";
+        doel += t.goals.recovery;
     }
 
-    // Genereer de HTML voor de dagelijkse routineverdelingen
     let routinesHTML = '';
     routines.forEach(r => {
         routinesHTML += `
             <div class="workout-day-box">
                 <div class="workout-day-header">${r.dag}</div>
                 <div class="workout-day-body">${r.spieren}</div>
-                <div class="workout-day-details"><b>${currentLang === 'EN' ? 'Core exercises:' : 'Basis oefeningen:'}</b> ${r.oefeningen}</div>
+                <div class="workout-day-details"><b>${t.coreExercises}</b> ${r.oefeningen}</div>
             </div>
         `;
     });
 
     container.innerHTML = `
         <div class="dashboard-card">
-            <h3>${currentLang === 'EN' ? 'Custom Routine' : 'Gepersonaliseerd Trainingsprogramma'}</h3>
-            <p class="subtitle">${currentLang === 'EN' ? 'Generated using real fysiometrics' : 'Gegenereerd op basis van actuele fysiometrie'}</p>
+            <h3>${t.titleCustom}</h3>
+            <p class="subtitle">${t.subCustom}</p>
             
             <div style="margin-bottom: 14px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
                 <div>
-                    <label>${currentLang === 'EN' ? 'Target Goal' : 'Doelstelling'}</label>
+                    <label>${t.targetGoal}</label>
                     <p style="font-weight: 700; font-size: 1rem; color: var(--accent);">${doel}</p>
                 </div>
                 <div style="text-align: right;">
-                    <label>${currentLang === 'EN' ? 'Split System' : 'Systeemsplit'}</label>
+                    <label>${t.splitSystem}</label>
                     <p style="font-weight: 600; font-size: 1rem;">${splitName}</p>
                 </div>
             </div>
 
-            <label style="margin-bottom: 4px;">${currentLang === 'EN' ? 'Daily Split Breakdown' : 'Schema Verdeling per Dag'}</label>
+            <label style="margin-bottom: 4px;">${t.dailyBreakdown}</label>
             ${routinesHTML}
         </div>
     `;
 }
+
+// Expose globally for HTML onclick triggers
+window.switchView = switchView;
+window.saveProfile = saveProfile;
+window.resetAllData = resetAllData;
+window.addNewLog = addNewLog;
 
 // ================= DATA EN INSTELLINGEN OPSLAAN =================
 function saveProfile() {
@@ -470,10 +354,13 @@ function saveProfile() {
     localStorage.setItem('gymLockProfile', JSON.stringify(profile));
     generateAndRenderWorkout();
     updateChart();
-    alert(info[currentLang].msgSaved);
+    
+    if (info[currentLang]) alert(info[currentLang].msgSaved);
 }
 
 function resetAllData() {
+    if (!info[currentLang]) return;
+
     if (confirm(info[currentLang].msgResetConfirm)) {
         localStorage.clear();
         logs = [];
