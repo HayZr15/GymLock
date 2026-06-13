@@ -48,12 +48,26 @@ body {
 }
 
 .lang-badge {
-    border: 1px solid #71717A;
-    font-size: 11px;
-    padding: 2px 6px;
+    background-color: #18181B;    /* Donkere achtergrond, net als de dashboard-kaartjes */
+    color: #CCFF00;               /* De felle tekstkleur springt er nu perfect uit */
+    border: 1px solid #CCFF00;    /* Een strakke neon rand eromheen */
+    padding: 3px 8px;
     border-radius: 6px;
+    font-size: 11px;
     font-weight: 700;
-    color: #CCFF00;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lang-badge:hover {
+    background-color: #CCFF00;    /* Keert om bij hover: neon achtergrond... */
+    color: #09090B;               /* ...en pikzwarte letters voor ultiem contrast */
+    box-shadow: 0 0 10px rgba(204, 255, 0, 0.4); /* Geeft een coole glow */
 }
 
 /* --- CARDS --- */
