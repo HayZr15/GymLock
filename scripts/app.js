@@ -2,7 +2,7 @@
 let logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
 let editLogId = null;
 
-// Dynamische data voor het HOOFDVELD
+// Dynamische data voor het HOOFDVELD (Getallen invoer)
 const placeholders = {
     steps: "Bijv. 10000",
     calories: "Bijv. 2450",
@@ -19,13 +19,19 @@ const valueLabels = {
     cardio: "Duur (minuten)"
 };
 
-// Dynamische data voor het NIEUWE SUB-VELD
+// DYNAMISCHE DATA VOOR HET SUB-VELD (Nu voor ALLE activiteitstypen!)
 const subPlaceholders = {
+    steps: "Bijv. Ochtendwandeling, hardlopen, werk (optioneel)",
+    calories: "Bijv. Ontbijt, pre-workout snack, avondeten (optioneel)",
+    weight: "Bijv. Ochtend nuchter, avond (na eten) (optioneel)",
     strength: "Bijv. Bench Press, Squat, Shoulder Press",
     cardio: "Bijv. Hardlopen, Fietsen, Roeitrainer"
 };
 
 const subLabels = {
+    steps: "Specifieke activiteit / Context",
+    calories: "Welke maaltijd / Context?",
+    weight: "Meetmoment / Context",
     strength: "Welke oefening?",
     cardio: "Welke activiteit?"
 };
@@ -41,6 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     updateDashboardStats();
     renderHistory();
+
+    // Zorg dat bij het opstarten direct de juiste placeholders voor 'Stappen' geladen worden
+    document.getElementById("log-type").dispatchEvent(new Event('change'));
 });
 
 function setupNavigation() {
@@ -77,20 +86,20 @@ function setupDynamicPlaceholders() {
     typeSelect.addEventListener("change", () => {
         const selectedType = typeSelect.value;
         
-        // Update hoofdveld labels & placeholders
+        // Update het hoofdveld
         valueInput.placeholder = placeholders[selectedType];
         valueLabel.textContent = valueLabels[selectedType];
 
-        // Toon of verberg het sub-veld op basis van je keuze
+        // Toon het sub-veld ALTIJD, verander de teksten dynamisch mee
+        subGroup.style.display = "flex";
+        subLabel.textContent = subLabels[selectedType];
+        subInput.placeholder = subPlaceholders[selectedType];
+        
+        // Alleen verplicht stellen bij krachttraining en cardio
         if (selectedType === 'strength' || selectedType === 'cardio') {
-            subGroup.style.display = "flex";
-            subLabel.textContent = subLabels[selectedType];
-            subInput.placeholder = subPlaceholders[selectedType];
-            subInput.required = true; // Verplicht maken als het krachttraining of cardio is
+            subInput.required = true;
         } else {
-            subGroup.style.display = "none";
             subInput.required = false;
-            subInput.value = ""; // Resetten als het niet nodig is
         }
     });
 }
@@ -111,7 +120,7 @@ function setupLoggingForm() {
         const type = typeSelect.value;
         const date = dateInput.value;
         const value = parseFloat(valueInput.value);
-        const subActivity = subInput.value.trim();
+        const subActivity = subInput.value.trim(); // Haalt spaties weg
 
         if (editLogId !== null) {
             // EDIT MODE
@@ -225,11 +234,23 @@ function renderHistory() {
         let displayType = log.type.toUpperCase();
         let displayUnit = "";
         
-        if (log.type === "steps") displayType = "👣 STEPS";
-        if (log.type === "calories") { displayType = "🔥 CALORIES"; displayUnit = " kcal"; }
-        if (log.type === "weight") { displayType = "📉 WEIGHT"; displayUnit = " kg"; }
+        // Maak een extra tekstje aan als de gebruiker context heeft ingevuld (bijv: " (Ochtendwandeling)")
+        const extraContextText = log.subActivity ? ` <span style="color: #71717A; font-size: 12px; font-weight:400;">(${log.subActivity})</span>` : "";
         
-        // Dynamische naamsverwerking voor krachttraining en cardio!
+        if (log.type === "steps") { 
+            displayType = "👣 STEPS" + extraContextText; 
+            displayUnit = ""; 
+        }
+        if (log.type === "calories") { 
+            displayType = "🔥 CALORIES" + extraContextText; 
+            displayUnit = " kcal"; 
+        }
+        if (log.type === "weight") { 
+            displayType = "📉 WEIGHT" + extraContextText; 
+            displayUnit = " kg"; 
+        }
+        
+        // Bij krachttraining en cardio is de subActivity de hoofdnaam van de kaart
         if (log.type === "strength") { 
             displayType = `🏋️ ${log.subActivity.toUpperCase()}`; 
             displayUnit = " kg"; 
@@ -244,7 +265,7 @@ function renderHistory() {
 
         card.innerHTML = `
             <div class="history-info">
-                <strong style="font-size: 14px;">${displayType}</strong>
+                <strong style="font-size: 14px; display: flex; align-items: center; gap: 6px;">${displayType}</strong>
                 <span class="history-date">${formattedDate}</span>
             </div>
             <div class="history-actions">
@@ -278,8 +299,6 @@ window.editLog = function(id) {
     document.getElementById("log-type").value = logToEdit.type;
     document.getElementById("log-date").value = logToEdit.date;
     document.getElementById("log-value").value = logToEdit.value;
-    
-    // Zorg dat het sub-veld ook weer gevuld wordt bij editen
     document.getElementById("log-sub-activity").value = logToEdit.subActivity || "";
 
     document.getElementById("form-title").innerHTML = `Edit <span style="color: #CCFF00;">Log</span>`;
