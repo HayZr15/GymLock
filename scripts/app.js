@@ -1,24 +1,36 @@
 // --- STATE MANAGEMENT & LOCALSTORAGE ---
 let logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
-let editLogId = null; // Houdt bij welke log we bewerken (indien in edit mode)
+let editLogId = null;
 
-// Dynamische voorbeeldantwoorden per activiteit
+// Dynamische data voor het HOOFDVELD
 const placeholders = {
-    steps: "Bijv. 10000 (stappen)",
-    calories: "Bijv. 2450 (kcal)",
-    weight: "Bijv. 79.5 (kg)",
-    workout: "Bijv. 60 (minuten)"
+    steps: "Bijv. 10000",
+    calories: "Bijv. 2450",
+    weight: "Bijv. 79.5",
+    strength: "Bijv. 80",
+    cardio: "Bijv. 45"
 };
 
 const valueLabels = {
     steps: "Aantal stappen",
     calories: "Aantal verbrande calorieën (kcal)",
     weight: "Huidig gewicht (kg)",
-    workout: "Duur van de workout (minuten)"
+    strength: "Gewicht (kg)",
+    cardio: "Duur (minuten)"
+};
+
+// Dynamische data voor het NIEUWE SUB-VELD
+const subPlaceholders = {
+    strength: "Bijv. Bench Press, Squat, Shoulder Press",
+    cardio: "Bijv. Hardlopen, Fietsen, Roeitrainer"
+};
+
+const subLabels = {
+    strength: "Welke oefening?",
+    cardio: "Welke activiteit?"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Zet datumkiezer standaard op vandaag
     const dateInput = document.getElementById("log-date");
     dateInput.value = new Date().toISOString().split('T')[0];
 
@@ -27,12 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setupDynamicPlaceholders();
     setupSettings();
     
-    // Eerste render bij opstarten app
     updateDashboardStats();
     renderHistory();
 });
 
-// --- NAVIGATIE SCHERMEN ---
 function setupNavigation() {
     const buttons = document.querySelectorAll(".nav-btn");
     const screens = document.querySelectorAll(".app-screen");
@@ -54,25 +64,44 @@ function setupNavigation() {
     });
 }
 
-// --- DYNAMISCHE PLACEHOLDERS ---
+// --- DYNAMISCHE PLACEHOLDERS & SUB-VELD LOGICA ---
 function setupDynamicPlaceholders() {
     const typeSelect = document.getElementById("log-type");
     const valueInput = document.getElementById("log-value");
     const valueLabel = document.getElementById("value-label");
+    
+    const subGroup = document.getElementById("sub-activity-group");
+    const subLabel = document.getElementById("sub-activity-label");
+    const subInput = document.getElementById("log-sub-activity");
 
     typeSelect.addEventListener("change", () => {
         const selectedType = typeSelect.value;
+        
+        // Update hoofdveld labels & placeholders
         valueInput.placeholder = placeholders[selectedType];
         valueLabel.textContent = valueLabels[selectedType];
+
+        // Toon of verberg het sub-veld op basis van je keuze
+        if (selectedType === 'strength' || selectedType === 'cardio') {
+            subGroup.style.display = "flex";
+            subLabel.textContent = subLabels[selectedType];
+            subInput.placeholder = subPlaceholders[selectedType];
+            subInput.required = true; // Verplicht maken als het krachttraining of cardio is
+        } else {
+            subGroup.style.display = "none";
+            subInput.required = false;
+            subInput.value = ""; // Resetten als het niet nodig is
+        }
     });
 }
 
-// --- FORMULIERAFHANDELING (ADD & EDIT) ---
+// --- FORMULIERAFHANDELING ---
 function setupLoggingForm() {
     const form = document.getElementById("log-form");
     const typeSelect = document.getElementById("log-type");
     const dateInput = document.getElementById("log-date");
     const valueInput = document.getElementById("log-value");
+    const subInput = document.getElementById("log-sub-activity");
     const submitBtn = document.getElementById("submit-btn");
     const cancelBtn = document.getElementById("cancel-edit-btn");
 
@@ -82,12 +111,13 @@ function setupLoggingForm() {
         const type = typeSelect.value;
         const date = dateInput.value;
         const value = parseFloat(valueInput.value);
+        const subActivity = subInput.value.trim();
 
         if (editLogId !== null) {
-            // EDIT MODE: Update bestaande log
+            // EDIT MODE
             logs = logs.map(log => {
                 if (log.id === editLogId) {
-                    return { ...log, type, date, value };
+                    return { ...log, type, date, value, subActivity };
                 }
                 return log;
             });
@@ -95,14 +125,15 @@ function setupLoggingForm() {
             submitBtn.textContent = "LOG OPSLAAN";
             document.getElementById("form-title").innerHTML = `Add <span style="color: #CCFF00;">Log</span>`;
             cancelBtn.style.display = "none";
-            typeSelect.disabled = false; // Ontgrendel selectie weer
+            typeSelect.disabled = false;
         } else {
-            // ADD MODE: Maak een nieuwe log aan
+            // ADD MODE
             const newLog = {
-                id: Date.now().toString(), // Unieke ID genereren
+                id: Date.now().toString(),
                 type,
                 date,
-                value
+                value,
+                subActivity
             };
             logs.push(newLog);
         }
@@ -111,12 +142,13 @@ function setupLoggingForm() {
         updateDashboardStats();
         renderHistory();
 
-        // Reset invoerveld en stuur terug naar Dashboard
-        valueInput.value = "";
+        // Volledige reset en terug naar Dashboard
+        form.reset();
+        dateInput.value = new Date().toISOString().split('T')[0];
+        typeSelect.dispatchEvent(new Event('change')); // Reset de placeholders
         document.querySelector('[data-screen="screen-dashboard"]').click();
     });
 
-    // Annuleren knop tijdens editen
     cancelBtn.addEventListener("click", () => {
         editLogId = null;
         form.reset();
@@ -125,31 +157,30 @@ function setupLoggingForm() {
         document.getElementById("form-title").innerHTML = `Add <span style="color: #CCFF00;">Log</span>`;
         cancelBtn.style.display = "none";
         typeSelect.disabled = false;
-        // Trigger handmatig change event om placeholder te herstellen
         typeSelect.dispatchEvent(new Event('change'));
     });
 }
 
-// --- DASHBOARD CALCULATIONS (LIVE UPDATING) ---
+// --- DASHBOARD BEREKENINGEN ---
 function updateDashboardStats() {
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // 1. STEPS (Sommeren van alle stappen ingevoerd voor VANDAAG)
+    // 1. Steps vandaag
     const todaySteps = logs
         .filter(l => l.type === 'steps' && l.date === todayStr)
         .reduce((sum, l) => sum + l.value, 0);
     document.getElementById("stat-steps").textContent = todaySteps > 0 ? todaySteps.toLocaleString('en-US') : "0";
 
-    // 2. CALORIES (Sommeren van alle kcal ingevoerd voor VANDAAG)
+    // 2. Calories vandaag
     const todayCalories = logs
         .filter(l => l.type === 'calories' && l.date === todayStr)
         .reduce((sum, l) => sum + l.value, 0);
     document.getElementById("stat-calories").textContent = todayCalories > 0 ? todayCalories.toLocaleString('en-US') : "0";
 
-    // 3. WORKOUTS (Aantal workout logs ingevoerd in de HUIDIGE KALENDERWEEK)
+    // 3. Workouts (Telt alle Krachttraining + Cardio logs van deze week samen)
     const now = new Date();
     const currentDay = now.getDay();
-    const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1; // Zondag fix
+    const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
     const monday = new Date(now);
     monday.setDate(now.getDate() - distanceToMonday);
     monday.setHours(0,0,0,0);
@@ -159,16 +190,15 @@ function updateDashboardStats() {
     sunday.setHours(23,59,59,999);
 
     const weekWorkouts = logs.filter(l => {
-        if (l.type !== 'workout') return false;
+        if (l.type !== 'strength' && l.type !== 'cardio') return false;
         const logDate = new Date(l.date);
         return logDate >= monday && logDate <= sunday;
     }).length;
     document.getElementById("stat-workouts").textContent = weekWorkouts;
 
-    // 4. WEIGHT (Altijd het allernieuwste gewicht tonen dat ooit gelogd is)
+    // 4. Weight (Meest recente gewichtslog)
     const weightLogs = logs.filter(l => l.type === 'weight');
     if (weightLogs.length > 0) {
-        // Sorteer op datum om de nieuwste te pakken
         weightLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
         document.getElementById("stat-weight").textContent = weightLogs[0].value + " kg";
     } else {
@@ -176,7 +206,7 @@ function updateDashboardStats() {
     }
 }
 
-// --- RENDER GESCHIEDENIS MET EDIT/DELETE ---
+// --- RENDER GESCHIEDENIS ---
 function renderHistory() {
     const container = document.getElementById("history-container");
     container.innerHTML = "";
@@ -186,7 +216,6 @@ function renderHistory() {
         return;
     }
 
-    // Sorteer geschiedenis op datum (nieuwste bovenaan)
     const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
 
     sortedLogs.forEach(log => {
@@ -195,12 +224,21 @@ function renderHistory() {
         
         let displayType = log.type.toUpperCase();
         let displayUnit = "";
+        
         if (log.type === "steps") displayType = "👣 STEPS";
         if (log.type === "calories") { displayType = "🔥 CALORIES"; displayUnit = " kcal"; }
         if (log.type === "weight") { displayType = "📉 WEIGHT"; displayUnit = " kg"; }
-        if (log.type === "workout") { displayType = "🏋️ WORKOUT"; displayUnit = " min"; }
+        
+        // Dynamische naamsverwerking voor krachttraining en cardio!
+        if (log.type === "strength") { 
+            displayType = `🏋️ ${log.subActivity.toUpperCase()}`; 
+            displayUnit = " kg"; 
+        }
+        if (log.type === "cardio") { 
+            displayType = `🏃 ${log.subActivity.toUpperCase()}`; 
+            displayUnit = " min"; 
+        }
 
-        // Formatteer datum naar nette weergave
         const dateObj = new Date(log.date);
         const formattedDate = dateObj.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -219,7 +257,6 @@ function renderHistory() {
     });
 }
 
-// --- EDIT & DELETE ACTION FUNCTIES ---
 window.deleteLog = function(id) {
     if (confirm("Weet je zeker dat je deze log wilt verwijderen?")) {
         logs = logs.filter(log => log.id !== id);
@@ -236,28 +273,25 @@ window.editLog = function(id) {
     const logToEdit = logs.find(log => log.id === id);
     if (!logToEdit) return;
 
-    // Activeer Edit modus status
     editLogId = id;
 
-    // Vul formuliervelden met de huidige data van de log
     document.getElementById("log-type").value = logToEdit.type;
     document.getElementById("log-date").value = logToEdit.date;
     document.getElementById("log-value").value = logToEdit.value;
+    
+    // Zorg dat het sub-veld ook weer gevuld wordt bij editen
+    document.getElementById("log-sub-activity").value = logToEdit.subActivity || "";
 
-    // Update UI elementen van het formulier
     document.getElementById("form-title").innerHTML = `Edit <span style="color: #CCFF00;">Log</span>`;
     document.getElementById("submit-btn").textContent = "WIJZIGINGEN OPSLAAN";
     document.getElementById("cancel-edit-btn").style.display = "block";
-    document.getElementById("log-type").disabled = true; // Vergrendel type om inconsistentie te voorkomen
+    document.getElementById("log-type").disabled = true;
 
-    // Trigger placeholders update
     document.getElementById("log-type").dispatchEvent(new Event('change'));
 
-    // Scroll soepel naar de bovenkant van het formulier
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// --- SETTINGS HULPFUNCTIES ---
 function setupSettings() {
     document.getElementById("clear-data-btn").addEventListener("click", () => {
         if (confirm("Weet je het 100% zeker? Dit wist je volledige geschiedenis permanent.")) {
