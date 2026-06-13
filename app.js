@@ -1,3 +1,12 @@
+// --- PWA SERVICE WORKER REGISTRATIE ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('GymLock Service Worker succesvol geregistreerd!', reg.scope))
+            .catch(err => console.log('Service Worker registratie mislukt: ', err));
+    });
+}
+
 // --- STATE MANAGEMENT & LOCALSTORAGE ---
 let logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
 let currentLang = localStorage.getItem('gymlock_lang') || 'nl';
