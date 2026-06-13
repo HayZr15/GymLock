@@ -74,28 +74,24 @@
             </section>
 
             <section class="chart-card">
-                <span class="chart-tag">PROGRESS CHART — WEIGHT TRACKER</span>
+                <div class="chart-header-row">
+                    <span class="chart-tag" id="chart-title-text">PROGRESS CHART — WEIGHT TRACKER</span>
+                    <select id="chart-metric-select" class="chart-select">
+                        <option value="weight">📉 Gewicht (kg)</option>
+                        <option value="steps">👣 Stappen</option>
+                        <option value="calories">🔥 Calorieën (kcal)</option>
+                    </select>
+                </div>
+                
                 <div class="chart-info">
-                    <span class="weight-diff">-4.0 kg</span>
-                    <span class="weight-current">84.7</span>
+                    <span class="weight-diff" id="chart-diff-value">--</span>
+                    <span class="weight-current" id="chart-current-value">--</span>
                 </div>
 
-                <div class="svg-chart-container">
-                    <svg viewBox="0 0 300 100" class="weight-svg">
-                        <text x="5" y="20" class="axis-text">84.7</text>
-                        <text x="5" y="55" class="axis-text">81.7</text>
-                        <text x="5" y="90" class="axis-text">79.7</text>
-                        <path d="M 50 25 L 120 45 L 190 60 L 270 90" fill="none" stroke="#CCFF00" stroke-width="2.5" stroke-linecap="round"/>
-                        <circle cx="50" cy="25" r="3.5" fill="#CCFF00" />
-                        <circle cx="120" cy="45" r="3.5" fill="#CCFF00" />
-                        <circle cx="190" cy="60" r="3.5" fill="#CCFF00" />
-                        <circle cx="270" cy="90" r="3.5" fill="#CCFF00" />
-                    </svg>
-                    <div class="chart-dates">
-                        <span>May 1</span>
-                        <span>May 16</span>
-                        <span>Jun 1</span>
-                    </div>
+                <div class="svg-chart-container" style="position: relative;">
+                    <svg viewBox="0 0 300 120" class="weight-svg" id="dynamic-svg">
+                        </svg>
+                    <div id="chart-tooltip" class="chart-tooltip" style="display: none;"></div>
                 </div>
             </section>
         </div>
@@ -117,14 +113,23 @@
                     </select>
                 </div>
 
-                <div class="input-group" id="sub-activity-group" style="display: none;">
-                    <label id="sub-activity-label">Specifieke Oefening</label>
-                    <input type="text" id="log-sub-activity" placeholder="Bijv. Bench Press">
+                <div class="input-group" id="sub-activity-group">
+                    <label id="sub-activity-label">Specifieke activiteit / Context</label>
+                    <input type="text" id="log-sub-activity" placeholder="Bijv. Ochtendwandeling">
+                </div>
+
+                <div class="input-group" id="intensity-group" style="display: none;">
+                    <label>Intensiteit / Zwaarte</label>
+                    <select id="log-intensity">
+                        <option value="light">🟢 Licht (RPE 6-7 / Hersteltraining)</option>
+                        <option value="medium" selected>🟡 Gemiddeld (RPE 8 / Normale werkset)</option>
+                        <option value="heavy">🔴 Zwaar (RPE 9-10 / Fail set of PR poging)</option>
+                    </select>
                 </div>
 
                 <div class="input-group">
                     <label for="log-date">Datum van activiteit</label>
-                    <input type="date" id="log-date" required title="Datum van activiteit">
+                    <input type="date" id="log-date" title="Datum van activiteit" required>
                 </div>
 
                 <div class="input-group">
@@ -147,8 +152,8 @@
                 <span class="logo-text">Settings</span>
             </header>
             <div style="text-align: center; padding: 40px 20px;">
-                <p style="color: #71717A; font-size: 15px; margin-bottom: 8px;">GymLock v1.1.0</p>
-                <p style="color: #434347; font-size: 13px;">Volledig dynamisch met LocalStorage en Edit-functionaliteit.</p>
+                <p style="color: #71717A; font-size: 15px; margin-bottom: 8px;">GymLock v1.2.0</p>
+                <p style="color: #434347; font-size: 13px;">Interactieve SVG-grafiekengine en RPE intensiteit-ondersteuning.</p>
                 <button id="clear-data-btn" class="danger-btn" style="margin-top: 30px;">ALLE DATA WISSEN</button>
             </div>
         </div>
@@ -163,6 +168,6 @@
         </nav>
     </div>
 
-    <script src="scripts/app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
