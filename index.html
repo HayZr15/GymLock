@@ -1,22 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymLock Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>High-Fidelity Mobile Wireframe</title>
-      <meta name="description" content="Track your fitness journey with GymLock, a sleek app for logging workouts, monitoring progress, and managing health data in a high-contrast, user-friendly interface." />
-      <meta name="robots" content="noindex, nofollow" />
-      <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
-      
-    </head>
+    <div class="app-container">
+        
+        <div id="screen-dashboard" class="app-screen active">
+            <header class="app-header">
+                <div class="logo-area">
+                    <span class="logo-text">GymLock</span>
+                    <span class="lang-badge">EN</span>
+                </div>
+            </header>
 
-    <body>
-      
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-      
-    </body>
-  </html>
-  
+            <section class="suggestion-card">
+                <span class="card-tag">SUGGESTION OF THE DAY</span>
+                <h2 class="card-main-title">Suggested Workout Program</h2>
+                
+                <div class="inner-workout-box">
+                    <h3>Upper Body Strength</h3>
+                    <p>Bench Press - Pull-ups - OHP - Rows — 4x8</p>
+                </div>
+
+                <div class="badge-row">
+                    <span class="workout-badge">45 MIN</span>
+                    <span class="workout-badge">INTERMEDIATE</span>
+                    <span class="workout-badge">HYPERTROPHY</span>
+                </div>
+            </section>
+
+            <section class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-header">
+                        <span class="stat-icon">👣</span>
+                        <span class="stat-title">STEPS</span>
+                    </div>
+                    <div class="stat-number" id="stat-steps">0</div>
+                    <div class="stat-footer">vandaag</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-header">
+                        <span class="stat-icon">🔥</span>
+                        <span class="stat-title">CALORIES</span>
+                    </div>
+                    <div class="stat-number" id="stat-calories">0</div>
+                    <div class="stat-footer">kcal vandaag</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-header">
+                        <span class="stat-icon">🏋️</span>
+                        <span class="stat-title">WORKOUTS</span>
+                    </div>
+                    <div class="stat-number" id="stat-workouts">0</div>
+                    <div class="stat-footer">deze week</div>
+                </div>
+
+                <div class="stat-box">
+                    <div class="stat-header">
+                        <span class="stat-icon">📉</span>
+                        <span class="stat-title">WEIGHT</span>
+                    </div>
+                    <div class="stat-number" id="stat-weight">--</div>
+                    <div class="stat-footer">laatste log</div>
+                </div>
+            </section>
+
+            <section class="chart-card">
+                <span class="chart-tag">PROGRESS CHART — WEIGHT TRACKER</span>
+                <div class="chart-info">
+                    <span class="weight-diff">-4.0 kg</span>
+                    <span class="weight-current">84.7</span>
+                </div>
+
+                <div class="svg-chart-container">
+                    <svg viewBox="0 0 300 100" class="weight-svg">
+                        <text x="5" y="20" class="axis-text">84.7</text>
+                        <text x="5" y="55" class="axis-text">81.7</text>
+                        <text x="5" y="90" class="axis-text">79.7</text>
+                        <path d="M 50 25 L 120 45 L 190 60 L 270 90" fill="none" stroke="#CCFF00" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="50" cy="25" r="3.5" fill="#CCFF00" />
+                        <circle cx="120" cy="45" r="3.5" fill="#CCFF00" />
+                        <circle cx="190" cy="60" r="3.5" fill="#CCFF00" />
+                        <circle cx="270" cy="90" r="3.5" fill="#CCFF00" />
+                    </svg>
+                    <div class="chart-dates">
+                        <span>May 1</span>
+                        <span>May 16</span>
+                        <span>Jun 1</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="screen-logs" class="app-screen">
+            <header class="app-header">
+                <span class="logo-text" id="form-title">Add <span style="color: #CCFF00;">Log</span></span>
+            </header>
+            
+            <form id="log-form" class="log-form">
+                <div class="input-group">
+                    <label for="log-type">Type activiteit</label>
+                    <select id="log-type" title="Type activiteit">
+                        <option value="steps">👣 Stappen</option>
+                        <option value="calories">🔥 Calorieën (kcal)</option>
+                        <option value="weight">📉 Gewicht (kg)</option>
+                        <option value="workout">🏋️ Workout Sessie (minuten)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="log-date">Datum van activiteit</label>
+                    <input type="date" id="log-date" title="Datum van activiteit" placeholder="YYYY-MM-DD" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="log-value" id="value-label">Nieuwe Waarde</label>
+                    <input type="number" id="log-value" title="Nieuwe Waarde" step="any" placeholder="Bijv. 10000" required>
+                </div>
+
+                <button type="submit" id="submit-btn" class="submit-btn">LOG OPSLAAN</button>
+                <button type="button" id="cancel-edit-btn" class="cancel-btn" style="display: none;">ANNULEREN</button>
+            </form>
+
+            <div class="history-section">
+                <h3>Loggeschiedenis</h3>
+                <div id="history-container">
+                    </div>
+            </div>
+        </div>
+
+        <div id="screen-settings" class="app-screen">
+            <header class="app-header">
+                <span class="logo-text">Settings</span>
+            </header>
+            <div style="text-align: center; padding: 40px 20px;">
+                <p style="color: #71717A; font-size: 15px; margin-bottom: 8px;">GymLock v1.1.0</p>
+                <p style="color: #434347; font-size: 13px;">Volledig dynamisch met LocalStorage en Edit-functionaliteit.</p>
+                <button id="clear-data-btn" class="danger-btn" style="margin-top: 30px;">ALLE DATA WISSEN</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav-wrapper">
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-screen="screen-dashboard">DASHBOARD</button>
+            <button class="nav-btn" data-screen="screen-logs">LOGS</button>
+            <button class="nav-btn" data-screen="screen-settings">SETTINGS</button>
+        </nav>
+    </div>
+
+    <script src="scripts/app.js"></script>
+</body>
+</html>
