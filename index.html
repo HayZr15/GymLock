@@ -26,21 +26,12 @@
                 </div>
             </header>
 
-            <section class="suggestion-card">
-                <span class="card-tag" data-i18n="sugg_tag">SUGGESTION OF THE DAY</span>
-                <h2 class="card-main-title" data-i18n="sugg_title">Suggested Workout Program</h2>
-                
-                <div class="inner-workout-box">
-                    <h3 data-i18n="sugg_workout_name">Upper Body Strength</h3>
-                    <p>Bench Press - Pull-ups - OHP - Rows — 4x8</p>
-                </div>
-
-                <div class="badge-row">
-                    <span class="workout-badge" data-i18n="badge_time">45 MIN</span>
-                    <span class="workout-badge" data-i18n="badge_level">INTERMEDIATE</span>
-                    <span class="workout-badge" data-i18n="badge_type">HYPERTROPHY</span>
-                </div>
-            </section>
+            <div class="suggestion-card">
+                <span class="subtitle">SUGGESTIE VAN DE DAG</span>
+                <h2 id="suggestion-title">Aanbevolen Trainingsprogramma</h2>
+                <p id="suggestion-text">Laden van jouw persoonlijke suggestie...</p>
+                <div id="suggestion-tags" class="tag-container"></div>
+            </div>
 
             <section class="stats-grid">
                 <div class="stat-box">
@@ -109,43 +100,42 @@
             </header>
             
             <form id="log-form" class="log-form">
-                <div class="input-group">
-                    <label data-i18n="label_type">Type activiteit</label>
-                    <select id="log-type">
-                        <option value="steps" data-i18n="opt_steps_log">👣 Stappen</option>
-                        <option value="calories" data-i18n="opt_calories_log">🔥 Calorieën (kcal)</option>
-                        <option value="weight" data-i18n="opt_weight_log">📉 Lichaamsgewicht (kg)</option>
-                        <option value="strength" data-i18n="opt_strength_log">🏋️ Krachttraining (Oefening)</option>
-                        <option value="cardio" data-i18n="opt_cardio_log">🏃 Cardio (Sessie)</option>
+                <div class="log-form-container">
+                    <label for="log-type">Type log</label>
+                    <select id="log-type" onchange="toggleLogFields()">
+                        <option value="stappen">👣 Stappen</option>
+                        <option value="calorieen">🔥 Calorieën (kcal)</option>
+                        <option value="gewicht">📉 Gewicht (kg)</option>
+                        <option value="workout">🏋️ Krachttraining</option>
                     </select>
-                </div>
 
-                <div class="input-group" id="sub-activity-group">
-                    <label id="sub-activity-label" for="log-sub-activity">Specifieke activiteit / Context</label>
-                    <input type="text" id="log-sub-activity" placeholder="Bijv. Hardlopen, Bankdrukken" title="Specifieke activiteit of context" />
-                </div>
+                    <div id="standard-input-group">
+                        <label for="log-value">Nieuwe Waarde</label>
+                        <input type="number" id="log-value" placeholder="Bijv. 8500 of 79.5">
+                    </div>
 
-                <div class="input-group" id="intensity-group" style="display: none;">
-                    <label data-i18n="label_intensity">Intensiteit / Zwaarte</label>
-                    <select id="log-intensity">
-                        <option value="light" data-i18n="opt_light">🟢 Licht (RPE 6-7 / Hersteltraining)</option>
-                        <option value="medium" selected data-i18n="opt_medium">🟡 Gemiddeld (RPE 8 / Normale werkset)</option>
-                        <option value="heavy" data-i18n="opt_heavy">🔴 Zwaar (RPE 9-10 / Fail set of PR poging)</option>
-                    </select>
-                </div>
+                    <div id="workout-input-group" style="display: none;">
+                        <label for="workout-type">Focus / Spiergroep</label>
+                        <select id="workout-type">
+                            <option value="Borst">Borst (Chest Day)</option>
+                            <option value="Rug">Rug (Back Day)</option>
+                            <option value="Benen">Benen (Leg Day)</option>
+                            <option value="Schouders/Armen">Schouders & Armen</option>
+                        </select>
 
-                <div class="input-group">
-                    <label data-i18n="label_date">Datum van activiteit</label>
-                    <input type="date" id="log-date" required title="Selecteer de datum van de activiteit">
-                </div>
+                        <label style="margin-top: 15px;">Oefeningen invoeren</label>
+                        <div id="exercise-rows">
+                            <div class="exercise-row">
+                                <input type="text" class="ex-name" placeholder="Oefening (bijv. Bench Press)">
+                                <input type="number" class="ex-sets" placeholder="Sets">
+                                <input type="number" class="ex-reps" placeholder="Reps">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-secondary" onclick="addExerciseRow()">+ Oefening toevoegen</button>
+                    </div>
 
-                <div class="input-group">
-                    <label id="value-label" for="log-value">Aantal stappen</label>
-                    <input type="number" id="log-value" step="any" required placeholder="Bijv. 5000" title="Voer het aantal stappen of waarde van de geselecteerde activiteit in">
+                    <button class="btn-primary" onclick="saveLog()">LOG OPSLAAN</button>
                 </div>
-
-                <button type="submit" id="submit-btn" class="submit-btn">LOG OPSLAAN</button>
-                <button type="button" id="cancel-edit-btn" class="cancel-btn">ANNULEREN</button>
             </form>
 
             <div class="history-section">

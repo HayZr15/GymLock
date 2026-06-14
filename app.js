@@ -572,3 +572,140 @@ function setupSettings() {
 function saveToLocalStorage() {
     localStorage.setItem('gymlock_logs', JSON.stringify(logs));
 }
+
+// --- 1. SCHERM LOGICA VOOR WORKOUT VELDEN ---
+function toggleLogFields() {
+    const logType = document.getElementById('log-type').value;
+    const standardGroup = document.getElementById('standard-input-group');
+    const workoutGroup = document.getElementById('workout-input-group');
+
+    if (logType === 'workout') {
+        standardGroup.style.display = 'none';
+        workoutGroup.style.display = 'flex';
+    } else {
+        standardGroup.style.display = 'block';
+        workoutGroup.style.display = 'none';
+    }
+}
+
+function addExerciseRow() {
+    const container = document.getElementById('exercise-rows');
+    const newRow = document.createElement('div');
+    newRow.className = 'exercise-row';
+    newRow.innerHTML = `
+        <input type="text" class="ex-name" placeholder="Oefening">
+        <input type="number" class="ex-sets" placeholder="Sets">
+        <input type="number" class="ex-reps" placeholder="Reps">
+    `;
+    container.appendChild(newRow);
+}
+
+// --- 2. DE LOGS OPSLAAN (INCLUSIEF WORKOUTS) ---
+function saveLog() {
+    const logType = document.getElementById('log-type').value;
+    const today = new Date().toISOString().split('T')[0]; // Formaat: YYYY-MM-DD
+    
+    // Haal bestaande logs op uit localStorage
+    let logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
+    let logEntry = { date: today, type: logType };
+
+    if (logType === 'workout') {
+        const workoutType = document.getElementById('workout-type').value;
+        const rows = document.querySelectorAll('.exercise-row');
+        let exercises = [];
+
+        rows.forEach(row => {
+            const name = row.querySelector('.ex-name').value;
+            const sets = row.querySelector('.ex-sets').value;
+            const reps = row.querySelector('.ex-reps').value;
+            if (name && sets && reps) {
+                exercises.push({ name, sets, reps });
+            }
+        });
+
+        if (exercises.length === 0) {
+            alert('Voer tenminste één geldige oefening in!');
+            return;
+        }
+
+        logEntry.workoutType = workoutType;
+        logEntry.exercises = exercises;
+    } else {
+        const val = document.getElementById('log-value').value;
+        if (!val) {
+            alert('Vul een waarde in!');
+            return;
+        }
+        logEntry.value = Number(val);
+    }
+
+    logs.push(logEntry);
+    localStorage.setItem('gymlock_logs', JSON.setItem ? JSON.stringify(logs) : JSON.stringify(logs));
+    
+    alert('Succesvol opgeslagen!');
+    
+    // Reset invoervelden
+    if(document.getElementById('log-value')) document.getElementById('log-value').value = '';
+    document.getElementById('exercise-rows').innerHTML = `
+        <div class="exercise-row">
+            <input type="text" class="ex-name" placeholder="Oefening (bijv. Bench Press)">
+            <input type="number" class="ex-sets" placeholder="Sets">
+            <input type="number" class="ex-reps" placeholder="Reps">
+        </div>
+    `;
+
+    // Update direct het dashboard en de suggesties
+    initDashboard();
+}
+
+// --- 3. HET SLIMME SUGGESTIE-ALGORITME ---
+function updateDynamicSuggestion() {
+    const logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
+    const today = new Date().toISOString().split('T')[0];
+
+    const titleEl = document.getElementById('suggestion-title');
+    const textEl = document.getElementById('suggestion-text');
+    const tagsEl = document.getElementById('suggestion-tags');
+
+    if (!titleEl || !textEl) return;
+
+    // A. BEREKEN STAPPEN VAN VANDAAG
+    const todaySteps = logs
+        .filter(log => log.type === 'stappen' && log.date === today)
+        .reduce((sum, log) => sum + log.value, 0);
+
+    // CONTROLEER STAPPEN-DOEL (10.000 stappen)
+    if (todaySteps < 10000) {
+        const overig = 10000 - todaySteps;
+        titleEl.innerText = "👣 Stappen Doel Behalen";
+        textEl.innerText = `Je hebt vandaag ${todaySteps.toLocaleString()} stappen gezet. Loop nog ${overig.toLocaleString()} stappen om je dagelijkse doel te halen!`;
+        tagsEl.innerHTML = `<span class="badge">CARDIO</span><span class="badge">GEZONDHEID</span>`;
+        return; // Stop hier, stappen hebben prioriteit!
+    }
+
+    // B. CONTROLEER WORKOUTS VAN DEZE WEEK (Laatste 7 dagen)
+    const recentWorkouts = logs.filter(log => log.type === 'workout');
+    const heeftBorstGedaan = recentWorkouts.some(w => w.workoutType === 'Borst');
+    const heeftRugGedaan = recentWorkouts.some(w => w.workoutType === 'Rug');
+    const heeftBenenGedaan = recentWorkouts.some(w => w.workoutType === 'Benen');
+
+    if (heeftBorstGedaan && !heeftRugGedaan) {
+        titleEl.innerText = "🏋️ Tijd voor Back Day!";
+        textEl.innerText = "Je hebt deze week je borst al aangepakt, maar je rug nog niet. Focus vandaag op Rows, Pull-ups en Deadlifts voor een gebalanceerd fysiek.";
+        tagsEl.innerHTML = `<span class="badge">RUG</span><span class="badge">HYPERTROFIE</span>`;
+    } else if (heeftRugGedaan && !heeftBenenGedaan) {
+        titleEl.innerText = "🍗 Sla Leg Day niet over!";
+        textEl.innerText = "Je bovenlichaam heeft deze week vuur gehad. Vandaag is het tijd voor Squats, Leg Presses en Lunges. Bouw die basis op!";
+        tagsEl.innerHTML = `<span class="badge">BENEN</span><span class="badge">KRACHT</span>`;
+    } else {
+        // Standaard suggestie als alles voor deze week al is gedaan of alles leeg is
+        titleEl.innerText = "💪 Upper Body Strength";
+        textEl.innerText = "Geen dringende tekorten deze week! Aanbevolen basistraining: Bench Press - Pull-ups - OHP - Rows (4x8)";
+        tagsEl.innerHTML = `<span class="badge">45 MIN</span><span class="badge">GEMIDDELD</span><span class="badge">ALL-ROUND</span>`;
+    }
+}
+
+// Zorg ervoor dat deze functie wordt aangeroepen zodra de app opstart (bijv. in je init- of render-functie)
+window.addEventListener('load', () => {
+    updateDynamicSuggestion();
+});

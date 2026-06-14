@@ -452,3 +452,43 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #CCFF00;
     border: 1.5px solid #CCFF00;
 }
+
+/* Workout invoervelden styling */
+#workout-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.exercise-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.exercise-row .ex-name {
+    flex: 2; /* Geeft de naam van de oefening meer ruimte */
+}
+
+.exercise-row .ex-sets,
+.exercise-row .ex-reps {
+    flex: 1;
+    text-align: center;
+}
+
+.btn-secondary {
+    background-color: #18181B;
+    color: #CCFF00;
+    border: 1px dashed #CCFF00;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(204, 255, 0, 0.1);
+}
