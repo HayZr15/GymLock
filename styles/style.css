@@ -492,3 +492,86 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-secondary:hover {
     background-color: rgba(204, 255, 0, 0.1);
 }
+
+/* Suggestie Kaart Layout Upgrades */
+.suggestion-subtitle {
+    color: #CCFF00;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.suggestion-inner-card {
+    background-color: #18181B; /* Subtiel lichtere achtergrond */
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+    text-align: left;
+}
+
+.suggestion-tags-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* De strakke neon tags onderaan */
+.suggestion-tag {
+    background-color: rgba(204, 255, 0, 0.05);
+    color: #CCFF00;
+    border: 1px solid rgba(204, 255, 0, 0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Styling voor invoervelden in het Log-scherm */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    color: #a1a1aa;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input-group input, 
+.input-group select {
+    background-color: #18181B;
+    border: 1px solid #27272A;
+    color: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group input:focus, 
+.input-group select:focus {
+    border-color: #CCFF00;
+}
+
+/* Oefeningen rijen binnen krachttraining */
+.exercise-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.exercise-row .ex-name { flex: 2; }
+.exercise-row .ex-sets, 
+.exercise-row .ex-reps { flex: 1; text-align: center; }

@@ -27,10 +27,16 @@
             </header>
 
             <div class="suggestion-card">
-                <span class="subtitle">SUGGESTIE VAN DE DAG</span>
+                <span class="suggestion-subtitle">SUGGESTIE VAN DE DAG</span>
                 <h2 id="suggestion-title">Aanbevolen Trainingsprogramma</h2>
-                <p id="suggestion-text">Laden van jouw persoonlijke suggestie...</p>
-                <div id="suggestion-tags" class="tag-container"></div>
+                
+                <div class="suggestion-inner-card">
+                    <div id="suggestion-content-title" style="font-weight: 700; color: #ffffff; margin-bottom: 5px;">Laden...</div>
+                    <div id="suggestion-text" style="color: #a1a1aa; font-size: 14px; line-height: 1.4;">Jouw persoonlijke suggestie wordt berekend...</div>
+                </div>
+                
+                <div id="suggestion-tags" class="suggestion-tags-container">
+                    </div>
             </div>
 
             <section class="stats-grid">
@@ -94,27 +100,28 @@
             </section>
         </div>
 
-        <div id="screen-logs" class="app-screen">
-            <header class="app-header">
-                <span class="logo-text" id="form-title">Add <span style="color: #CCFF00;">Log</span></span>
-            </header>
-            
-            <form id="log-form" class="log-form">
-                <div class="log-form-container">
-                    <label for="log-type">Type log</label>
-                    <select id="log-type" onchange="toggleLogFields()">
-                        <option value="stappen">👣 Stappen</option>
-                        <option value="calorieen">🔥 Calorieën (kcal)</option>
-                        <option value="gewicht">📉 Gewicht (kg)</option>
-                        <option value="workout">🏋️ Krachttraining</option>
-                    </select>
+        <div id="screen-logs" class="screen" style="display: none;">
+            <div class="card" style="max-width: 500px; margin: 0 auto;">
+                <h2 style="color: #CCFF00; margin-bottom: 20px; font-weight: 700;">Log toevoegen</h2>
+                
+                <form id="log-form" onsubmit="event.preventDefault();">
+                    
+                    <div class="input-group">
+                        <label for="log-type">Type log</label>
+                        <select id="log-type" onchange="toggleLogFields()">
+                            <option value="stappen">👣 Stappen</option>
+                            <option value="calorieen">🔥 Calorieën (kcal)</option>
+                            <option value="gewicht">📉 Gewicht (kg)</option>
+                            <option value="workout">🏋️ Krachttraining</option>
+                        </select>
+                    </div>
 
-                    <div id="standard-input-group">
+                    <div id="standard-input-group" class="input-group">
                         <label for="log-value">Nieuwe Waarde</label>
                         <input type="number" id="log-value" placeholder="Bijv. 8500 of 79.5">
                     </div>
 
-                    <div id="workout-input-group" style="display: none;">
+                    <div id="workout-input-group" class="input-group" style="display: none;">
                         <label for="workout-type">Focus / Spiergroep</label>
                         <select id="workout-type">
                             <option value="Borst">Borst (Chest Day)</option>
@@ -123,7 +130,7 @@
                             <option value="Schouders/Armen">Schouders & Armen</option>
                         </select>
 
-                        <label style="margin-top: 15px;">Oefeningen invoeren</label>
+                        <label style="margin-top: 15px; color: #a1a1aa; font-size: 14px;">Oefeningen invoeren</label>
                         <div id="exercise-rows">
                             <div class="exercise-row">
                                 <input type="text" class="ex-name" placeholder="Oefening (bijv. Bench Press)">
@@ -134,13 +141,14 @@
                         <button type="button" class="btn-secondary" onclick="addExerciseRow()">+ Oefening toevoegen</button>
                     </div>
 
-                    <button class="btn-primary" onclick="saveLog()">LOG OPSLAAN</button>
-                </div>
-            </form>
-
-            <div class="history-section">
-                <h3 data-i18n="history_title">Loggeschiedenis</h3>
-                <div id="history-container"></div>
+                    <button type="submit" id="log-submit" class="btn-primary" onclick="saveLog()" style="width: 100%; margin-top: 10px;">LOG OPSLAAN</button>
+                </form>
+            </div>
+            
+            <div class="card" style="max-width: 500px; margin: 20px auto 0 auto; text-align: left;">
+                <h3 style="color: #ffffff; margin-bottom: 15px; font-weight: 600;">Loggeschiedenis</h3>
+                <div id="log-history-list" style="color: #a1a1aa; font-size: 14px;">
+                    </div>
             </div>
         </div>
 

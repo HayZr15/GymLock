@@ -130,7 +130,9 @@ const I18N = {
 
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("log-date");
-    dateInput.value = new Date().toISOString().split('T')[0];
+    if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
 
     setupNavigation();
     setupLoggingForm();
@@ -144,6 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
     updateDashboardStats();
     renderHistory();
     renderChart();
+
+    if (typeof updateDynamicSuggestion === 'function') {
+        updateDynamicSuggestion();
+    }
 });
 
 // --- TAAL INTERFACE UPDATE ENGINE ---
@@ -258,58 +264,34 @@ function setupLoggingForm() {
     const intensitySelect = document.getElementById("log-intensity");
     const cancelBtn = document.getElementById("cancel-edit-btn");
 
-    typeSelect.addEventListener("change", setupDynamicPlaceholders);
+    // Alleen luisteren naar veranderingen als de dropdown bestaat
+    if (typeSelect) {
+        typeSelect.addEventListener("change", setupDynamicPlaceholders);
+    }
 
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
+    // Alleen het formulier afhandelen als het formulier op dit scherm bestaat
+    if (form) {
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            
+            const type = typeSelect ? typeSelect.value : 'stappen';
+            const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+            
+            // Als valueInput bestaat gebruiken we de waarde, anders 0 (bijv. bij een workout)
+            let value = (valueInput && valueInput.value) ? parseFloat(valueInput.value) : 0;
+            const subActivity = subInput ? subInput.value.trim() : '';
 
-        const type = typeSelect.value;
-        const date = dateInput.value;
-        let value = parseFloat(valueInput.value);
-        const subActivity = subInput.value.trim();
-        const intensity = (type === 'strength' || type === 'cardio') ? intensitySelect.value : null;
+            // Roep je opslagfunctie aan
+            saveLog();
+        });
+    }
 
-        if (editLogId !== null) {
-            logs = logs.map(log => {
-                if (log.id === editLogId) {
-                    return { ...log, type, date, value, subActivity, intensity };
-                }
-                return log;
-            });
-            editLogId = null;
-            typeSelect.disabled = false;
-        } else {
-            const newLog = {
-                id: Date.now().toString(),
-                type,
-                date,
-                value,
-                subActivity,
-                intensity
-            };
-            logs.push(newLog);
-        }
-
-        saveToLocalStorage();
-        updateLanguageUI();
-        updateDashboardStats();
-        renderHistory();
-        renderChart();
-
-        form.reset();
-        dateInput.value = new Date().toISOString().split('T')[0];
-        setupDynamicPlaceholders();
-        document.querySelector('[data-screen="screen-dashboard"]').click();
-    });
-
-    cancelBtn.addEventListener("click", () => {
-        editLogId = null;
-        form.reset();
-        dateInput.value = new Date().toISOString().split('T')[0];
-        typeSelect.disabled = false;
-        updateLanguageUI();
-        setupDynamicPlaceholders();
-    });
+    // Alleen de annuleerknop activeren als die er daadwerkelijk is
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+            if (typeof resetForm === 'function') resetForm();
+        });
+    }
 }
 
 // --- DASHBOARD WIDGET BEREKENINGEN ---
@@ -658,16 +640,21 @@ function saveLog() {
     initDashboard();
 }
 
-// --- 3. HET SLIMME SUGGESTIE-ALGORITME ---
 function updateDynamicSuggestion() {
     const logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
-    const today = new Date().toISOString().split('T')[0];
+    
+    // Haal de datum van vandaag op in lokale tijd (YYYY-MM-DD)
+    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+    const today = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
 
+    // Haal alle DOM elementen veilig op
     const titleEl = document.getElementById('suggestion-title');
+    const contentTitleEl = document.getElementById('suggestion-content-title');
     const textEl = document.getElementById('suggestion-text');
     const tagsEl = document.getElementById('suggestion-tags');
 
-    if (!titleEl || !textEl) return;
+    // CRUCIALE FIX: Als de elementen niet op het huidige scherm staan, stop gerust zonder te crashen!
+    if (!titleEl || !textEl || !tagsEl || !contentTitleEl) return;
 
     // A. BEREKEN STAPPEN VAN VANDAAG
     const todaySteps = logs
@@ -677,35 +664,34 @@ function updateDynamicSuggestion() {
     // CONTROLEER STAPPEN-DOEL (10.000 stappen)
     if (todaySteps < 10000) {
         const overig = 10000 - todaySteps;
-        titleEl.innerText = "👣 Stappen Doel Behalen";
-        textEl.innerText = `Je hebt vandaag ${todaySteps.toLocaleString()} stappen gezet. Loop nog ${overig.toLocaleString()} stappen om je dagelijkse doel te halen!`;
-        tagsEl.innerHTML = `<span class="badge">CARDIO</span><span class="badge">GEZONDHEID</span>`;
-        return; // Stop hier, stappen hebben prioriteit!
+        titleEl.innerText = "Dagelijkse Activiteit";
+        contentTitleEl.innerText = "👣 Stappen Doel Behalen";
+        textEl.innerText = `Je hebt vandaag ${todaySteps.toLocaleString()} stappen gezet. Loop nog ${overig.toLocaleString()} stappen om je dagelijkse doel te behalen!`;
+        tagsEl.innerHTML = `<span class="suggestion-tag">Cardio</span><span class="suggestion-tag">Gezondheid</span><span class="suggestion-tag">Vandaag</span>`;
+        return; 
     }
 
-    // B. CONTROLEER WORKOUTS VAN DEZE WEEK (Laatste 7 dagen)
+    // B. CONTROLEER WORKOUTS VAN DEZE WEEK
     const recentWorkouts = logs.filter(log => log.type === 'workout');
     const heeftBorstGedaan = recentWorkouts.some(w => w.workoutType === 'Borst');
     const heeftRugGedaan = recentWorkouts.some(w => w.workoutType === 'Rug');
     const heeftBenenGedaan = recentWorkouts.some(w => w.workoutType === 'Benen');
 
     if (heeftBorstGedaan && !heeftRugGedaan) {
-        titleEl.innerText = "🏋️ Tijd voor Back Day!";
-        textEl.innerText = "Je hebt deze week je borst al aangepakt, maar je rug nog niet. Focus vandaag op Rows, Pull-ups en Deadlifts voor een gebalanceerd fysiek.";
-        tagsEl.innerHTML = `<span class="badge">RUG</span><span class="badge">HYPERTROFIE</span>`;
+        titleEl.innerText = "Aanbevolen Trainingsprogramma";
+        contentTitleEl.innerText = "🏋️ Rug & Achterkant Schouders (Back Day)";
+        textEl.innerText = "Je hebt deze week je borst al aangepakt, maar je rug nog niet. Focus vandaag op Rows, Pull-ups en Lat Pulldowns voor een gebalanceerde groei.";
+        tagsEl.innerHTML = `<span class="suggestion-tag">Rug</span><span class="suggestion-tag">Hypertrofie</span><span class="suggestion-tag">Kracht</span>`;
     } else if (heeftRugGedaan && !heeftBenenGedaan) {
-        titleEl.innerText = "🍗 Sla Leg Day niet over!";
+        titleEl.innerText = "Aanbevolen Trainingsprogramma";
+        contentTitleEl.innerText = "🍗 Sla Leg Day Niet Over!";
         textEl.innerText = "Je bovenlichaam heeft deze week vuur gehad. Vandaag is het tijd voor Squats, Leg Presses en Lunges. Bouw die basis op!";
-        tagsEl.innerHTML = `<span class="badge">BENEN</span><span class="badge">KRACHT</span>`;
+        tagsEl.innerHTML = `<span class="suggestion-tag">Benen</span><span class="suggestion-tag">Kracht</span><span class="suggestion-tag">Focus</span>`;
     } else {
-        // Standaard suggestie als alles voor deze week al is gedaan of alles leeg is
-        titleEl.innerText = "💪 Upper Body Strength";
-        textEl.innerText = "Geen dringende tekorten deze week! Aanbevolen basistraining: Bench Press - Pull-ups - OHP - Rows (4x8)";
-        tagsEl.innerHTML = `<span class="badge">45 MIN</span><span class="badge">GEMIDDELD</span><span class="badge">ALL-ROUND</span>`;
+        // Standaard suggestie
+        titleEl.innerText = "Aanbevolen Trainingsprogramma";
+        contentTitleEl.innerText = "💪 Bovenlichaam Kracht";
+        textEl.innerText = "Geen dringende tekorten deze week! Aanbevolen basistraining: Bench Press - Pull-ups - OHP - Rows — 4×8";
+        tagsEl.innerHTML = `<span class="suggestion-tag">45 Min</span><span class="suggestion-tag">Gemiddeld</span><span class="suggestion-tag">Hypertrofie</span>`;
     }
 }
-
-// Zorg ervoor dat deze functie wordt aangeroepen zodra de app opstart (bijv. in je init- of render-functie)
-window.addEventListener('load', () => {
-    updateDynamicSuggestion();
-});
