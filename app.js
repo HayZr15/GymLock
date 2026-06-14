@@ -229,22 +229,37 @@ function setupDynamicPlaceholders() {
     const subInput = document.getElementById("log-sub-activity");
     const intensityGroup = document.getElementById("intensity-group");
 
+    // 1. HOOFDCHECK: Als de dropdown er niet is (bijv. op het dashboard), stop direct!
+    if (!typeSelect) return;
+
     const selectedType = typeSelect.value;
     const langData = I18N[currentLang];
     
-    valueInput.placeholder = langData.placeholders[selectedType];
-    valueLabel.textContent = langData.valueLabels[selectedType];
+    // 2. INDIVIDUELE CHECKS: Pas elementen alleen aan als ze écht in je HTML staan
+    if (valueInput && langData.placeholders) {
+        valueInput.placeholder = langData.placeholders[selectedType] || "";
+    }
+    if (valueLabel && langData.valueLabels) {
+        valueLabel.textContent = langData.valueLabels[selectedType] || "";
+    }
 
-    subGroup.style.display = "flex";
-    subLabel.textContent = langData.subLabels[selectedType];
-    subInput.placeholder = langData.subPlaceholders[selectedType];
+    if (subGroup) {
+        subGroup.style.display = "flex";
+    }
+    if (subLabel && langData.subLabels) {
+        subLabel.textContent = langData.subLabels[selectedType] || "";
+    }
+    if (subInput && langData.subPlaceholders) {
+        subInput.placeholder = langData.subPlaceholders[selectedType] || "";
+    }
     
+    // 3. Veilig de intensiteit en verplichte velden schakelen
     if (selectedType === 'strength' || selectedType === 'cardio') {
-        intensityGroup.style.display = "flex";
-        subInput.required = true;
+        if (intensityGroup) intensityGroup.style.display = "flex";
+        if (subInput) subInput.required = true;
     } else {
-        intensityGroup.style.display = "none";
-        subInput.required = false;
+        if (intensityGroup) intensityGroup.style.display = "none";
+        if (subInput) subInput.required = false;
     }
 }
 
