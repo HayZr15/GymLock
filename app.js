@@ -52,7 +52,6 @@ const I18N = {
         nav_logs: "LOGS",
         nav_settings: "INSTELLINGEN",
         
-        // Dynamische JS elementen
         placeholders: { steps: "Bijv. 10000", calories: "Bijv. 2450", weight: "Bijv. 79.5", strength: "Bijv. 80", cardio: "Bijv. 45" },
         valueLabels: { steps: "Aantal stappen", calories: "Aantal verbrande / binnengekomen calorieën (kcal)", weight: "Huidig gewicht (kg)", strength: "Gewicht gebruikt (kg)", cardio: "Duur (minuten)" },
         subPlaceholders: { steps: "Bijv. Ochtendwandeling, hardlopen (optioneel)", calories: "Bijv. Ontbijt, avondeten (optioneel)", weight: "Bijv. Ochtend nuchter (optioneel)", strength: "Bijv. Bench Press, Squat", cardio: "Bijv. Hardlopen, Fietsen" },
@@ -108,7 +107,6 @@ const I18N = {
         nav_logs: "LOGS",
         nav_settings: "SETTINGS",
         
-        // Dynamische JS elementen
         placeholders: { steps: "E.g. 10000", calories: "E.g. 2450", weight: "E.g. 79.5", strength: "E.g. 80", cardio: "E.g. 45" },
         valueLabels: { steps: "Number of steps", calories: "Calories burned / consumed (kcal)", weight: "Current weight (kg)", strength: "Weight used (kg)", cardio: "Duration (minutes)" },
         subPlaceholders: { steps: "E.g. Morning walk, running (optional)", calories: "E.g. Breakfast, dinner (optional)", weight: "E.g. Morning fasted (optional)", strength: "E.g. Bench Press, Squat", cardio: "E.g. Running, Cycling" },
@@ -128,6 +126,7 @@ const I18N = {
     }
 };
 
+// --- INITIALISATIE ---
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("log-date");
     if (dateInput) {
@@ -146,28 +145,27 @@ document.addEventListener("DOMContentLoaded", () => {
     updateDashboardStats();
     renderHistory();
     renderChart();
-
-    if (typeof updateDynamicSuggestion === 'function') {
-        updateDynamicSuggestion();
-    }
+    updateDynamicSuggestion();
 });
 
 // --- TAAL INTERFACE UPDATE ENGINE ---
 function setupLanguageToggle() {
     const langBtn = document.getElementById("lang-toggle");
+    if (!langBtn) return;
+    
     langBtn.addEventListener("click", () => {
         currentLang = currentLang === 'nl' ? 'en' : 'nl';
         localStorage.setItem('gymlock_lang', currentLang);
         
         updateLanguageUI();
-        setupDynamicPlaceholders(); // Ververst placeholders direct naar juiste taal
-        renderHistory();            // Vertaalt eenheden in de geschiedenis direct
-        renderChart();              // Vertaalt de assen en titels van de grafiek direct
+        setupDynamicPlaceholders();
+        renderHistory();
+        renderChart();
     });
 }
 
 function updateLanguageUI() {
-    // Loop door alle HTML elementen met data-i18n kenmerk
+    // 1. Veilige update voor alle algemene i18n data attributen
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (I18N[currentLang] && I18N[currentLang][key]) {
@@ -175,24 +173,26 @@ function updateLanguageUI() {
         }
     });
 
-    // Update de taal-badge/knop tekst zelf
-    document.getElementById("lang-toggle").textContent = I18N[currentLang].lang_btn;
+    // 2. Veilige checks voor specifieke knoppen en titels op de pagina
+    const langBtn = document.getElementById("lang-toggle");
+    if (langBtn) langBtn.textContent = I18N[currentLang].lang_btn;
     
-    // Update de formuliertitels en knoppen dynamisch op basis van add/edit mode
     const submitBtn = document.getElementById("submit-btn");
     const cancelBtn = document.getElementById("cancel-edit-btn");
     const formTitle = document.getElementById("form-title");
     
-    if (editLogId !== null) {
-        formTitle.innerHTML = I18N[currentLang].editTitle;
-        submitBtn.textContent = I18N[currentLang].btnEdit;
-    } else {
-        formTitle.innerHTML = I18N[currentLang].addTitle;
-        submitBtn.textContent = I18N[currentLang].btnSave;
+    if (formTitle) {
+        formTitle.innerHTML = editLogId !== null ? I18N[currentLang].editTitle : I18N[currentLang].addTitle;
     }
-    cancelBtn.textContent = I18N[currentLang].btnCancel;
+    if (submitBtn) {
+        submitBtn.textContent = editLogId !== null ? I18N[currentLang].btnEdit : I18N[currentLang].btnSave;
+    }
+    if (cancelBtn) {
+        cancelBtn.textContent = I18N[currentLang].btnCancel;
+    }
 }
 
+// --- NAVIGATIE ---
 function setupNavigation() {
     const buttons = document.querySelectorAll(".nav-btn");
     const screens = document.querySelectorAll(".app-screen");
@@ -229,31 +229,18 @@ function setupDynamicPlaceholders() {
     const subInput = document.getElementById("log-sub-activity");
     const intensityGroup = document.getElementById("intensity-group");
 
-    // 1. HOOFDCHECK: Als de dropdown er niet is (bijv. op het dashboard), stop direct!
-    if (!typeSelect) return;
+    if (!typeSelect) return; // Veilige stop
 
     const selectedType = typeSelect.value;
     const langData = I18N[currentLang];
     
-    // 2. INDIVIDUELE CHECKS: Pas elementen alleen aan als ze écht in je HTML staan
-    if (valueInput && langData.placeholders) {
-        valueInput.placeholder = langData.placeholders[selectedType] || "";
-    }
-    if (valueLabel && langData.valueLabels) {
-        valueLabel.textContent = langData.valueLabels[selectedType] || "";
-    }
+    if (valueInput && langData.placeholders) valueInput.placeholder = langData.placeholders[selectedType] || "";
+    if (valueLabel && langData.valueLabels) valueLabel.textContent = langData.valueLabels[selectedType] || "";
 
-    if (subGroup) {
-        subGroup.style.display = "flex";
-    }
-    if (subLabel && langData.subLabels) {
-        subLabel.textContent = langData.subLabels[selectedType] || "";
-    }
-    if (subInput && langData.subPlaceholders) {
-        subInput.placeholder = langData.subPlaceholders[selectedType] || "";
-    }
+    if (subGroup) subGroup.style.display = "flex";
+    if (subLabel && langData.subLabels) subLabel.textContent = langData.subLabels[selectedType] || "";
+    if (subInput && langData.subPlaceholders) subInput.placeholder = langData.subPlaceholders[selectedType] || "";
     
-    // 3. Veilig de intensiteit en verplichte velden schakelen
     if (selectedType === 'strength' || selectedType === 'cardio') {
         if (intensityGroup) intensityGroup.style.display = "flex";
         if (subInput) subInput.required = true;
@@ -264,67 +251,136 @@ function setupDynamicPlaceholders() {
 }
 
 function setupChartToggle() {
-    document.getElementById("chart-metric-select").addEventListener("change", () => {
-        renderChart();
-    });
+    const metricSelect = document.getElementById("chart-metric-select");
+    if (metricSelect) {
+        metricSelect.addEventListener("change", renderChart);
+    }
 }
 
-// --- FORMULIERAFHANDELING ---
+// --- FORMULIERAFHANDELING (VEILIG & GECONSOLIDEERD) ---
 function setupLoggingForm() {
     const form = document.getElementById("log-form");
     const typeSelect = document.getElementById("log-type");
-    const dateInput = document.getElementById("log-date");
-    const valueInput = document.getElementById("log-value");
-    const subInput = document.getElementById("log-sub-activity");
-    const intensitySelect = document.getElementById("log-intensity");
     const cancelBtn = document.getElementById("cancel-edit-btn");
 
-    // Alleen luisteren naar veranderingen als de dropdown bestaat
     if (typeSelect) {
         typeSelect.addEventListener("change", setupDynamicPlaceholders);
     }
 
-    // Alleen het formulier afhandelen als het formulier op dit scherm bestaat
     if (form) {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
-            
-            const type = typeSelect ? typeSelect.value : 'stappen';
-            const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
-            
-            // Als valueInput bestaat gebruiken we de waarde, anders 0 (bijv. bij een workout)
-            let value = (valueInput && valueInput.value) ? parseFloat(valueInput.value) : 0;
-            const subActivity = subInput ? subInput.value.trim() : '';
-
-            // Roep je opslagfunctie aan
             saveLog();
         });
     }
 
-    // Alleen de annuleerknop activeren als die er daadwerkelijk is
     if (cancelBtn) {
-        cancelBtn.addEventListener("click", () => {
-            if (typeof resetForm === 'function') resetForm();
+        cancelBtn.addEventListener("click", resetForm);
+    }
+}
+
+function saveLog() {
+    const typeSelect = document.getElementById('log-type');
+    const dateInput = document.getElementById('log-date');
+    const valueInput = document.getElementById('log-value');
+    const subInput = document.getElementById('log-sub-activity');
+    const intensityInput = document.getElementById('log-intensity');
+
+    if (!typeSelect || !dateInput || !valueInput) return;
+
+    const logType = typeSelect.value;
+    const date = dateInput.value || new Date().toISOString().split('T')[0];
+    const value = parseFloat(valueInput.value);
+    
+    if (isNaN(value)) {
+        alert('Vul een geldige waarde in!');
+        return;
+    }
+
+    const newLog = {
+        id: editLogId ? editLogId : Date.now().toString(),
+        type: logType,
+        date: date,
+        value: value,
+        subActivity: subInput ? subInput.value.trim() : "",
+        intensity: intensityInput ? intensityInput.value : ""
+    };
+
+    if (editLogId) {
+        logs = logs.map(l => l.id === editLogId ? newLog : l);
+        editLogId = null;
+        if (typeSelect) typeSelect.disabled = false;
+    } else {
+        logs.push(newLog);
+    }
+
+    saveToLocalStorage();
+    resetForm();
+    alert('Log succesvol opgeslagen!');
+
+    // Update alles
+    updateLanguageUI();
+    updateDashboardStats();
+    renderHistory();
+    renderChart();
+    updateDynamicSuggestion();
+    
+    // Terug naar dashboard of logs
+    const logsTab = document.querySelector('[data-screen="screen-logs"]');
+    if (logsTab) logsTab.click();
+}
+
+function resetForm() {
+    const form = document.getElementById("log-form");
+    if (form) form.reset();
+    
+    const typeSelect = document.getElementById("log-type");
+    if (typeSelect) typeSelect.disabled = false;
+    
+    editLogId = null;
+    const dateInput = document.getElementById("log-date");
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    
+    updateLanguageUI();
+    setupDynamicPlaceholders();
+}
+
+// --- DATA BEHEER ---
+function saveToLocalStorage() {
+    localStorage.setItem('gymlock_logs', JSON.stringify(logs));
+}
+
+function setupSettings() {
+    const clearBtn = document.getElementById("clear-data-btn");
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            if (confirm(I18N[currentLang].confirmClear)) {
+                logs = [];
+                saveToLocalStorage();
+                alert(I18N[currentLang].clearSuccess);
+                window.location.reload(); // Herstart de app voor een 100% schone lei
+            }
         });
     }
 }
 
-// --- DASHBOARD WIDGET BEREKENINGEN ---
+// --- BEREKENINGEN & SUGGESTIES ---
 function updateDashboardStats() {
     const todayStr = new Date().toISOString().split('T')[0];
-    const langData = I18N[currentLang];
 
     // 1. Steps vandaag
     const todaySteps = logs
-        .filter(l => l.type === 'steps' && l.date === todayStr)
+        .filter(l => (l.type === 'steps' || l.type === 'stappen') && l.date === todayStr)
         .reduce((sum, l) => sum + l.value, 0);
-    document.getElementById("stat-steps").textContent = todaySteps > 0 ? todaySteps.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
+    const stepEl = document.getElementById("stat-steps");
+    if (stepEl) stepEl.textContent = todaySteps > 0 ? todaySteps.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
 
     // 2. Calories vandaag
     const todayCalories = logs
         .filter(l => l.type === 'calories' && l.date === todayStr)
         .reduce((sum, l) => sum + l.value, 0);
-    document.getElementById("stat-calories").textContent = todayCalories > 0 ? todayCalories.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
+    const calEl = document.getElementById("stat-calories");
+    if (calEl) calEl.textContent = todayCalories > 0 ? todayCalories.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
 
     // 3. Workouts deze week
     const now = new Date();
@@ -335,61 +391,128 @@ function updateDashboardStats() {
     monday.setHours(0,0,0,0);
 
     const weekWorkouts = logs.filter(l => {
-        if (l.type !== 'strength' && l.type !== 'cardio') return false;
-        const logDate = new Date(l.date);
-        return logDate >= monday;
+        if (l.type !== 'strength' && l.type !== 'cardio' && l.type !== 'workout') return false;
+        return new Date(l.date) >= monday;
     }).length;
-    document.getElementById("stat-workouts").textContent = weekWorkouts;
+    
+    const workoutEl = document.getElementById("stat-workouts");
+    if (workoutEl) workoutEl.textContent = weekWorkouts;
 
     // 4. Weight laatste log
     const weightLogs = logs.filter(l => l.type === 'weight');
-    if (weightLogs.length > 0) {
-        weightLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-        document.getElementById("stat-weight").textContent = weightLogs[0].value + " kg";
-    } else {
-        document.getElementById("stat-weight").textContent = "--";
+    const weightEl = document.getElementById("stat-weight");
+    if (weightEl) {
+        if (weightLogs.length > 0) {
+            weightLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            weightEl.textContent = weightLogs[0].value + " kg";
+        } else {
+            weightEl.textContent = "--";
+        }
     }
 }
 
-// --- INTERACTIEVE SVG GRAFIEK ENGINE ---
+function updateDynamicSuggestion() {
+    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+    const today = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+
+    const titleEl = document.getElementById('suggestion-title');
+    const contentTitleEl = document.getElementById('suggestion-content-title');
+    const textEl = document.getElementById('suggestion-text');
+    const tagsEl = document.getElementById('suggestion-tags');
+
+    // Als we niet op het dashboard staan (of HTML is niet klaar), stop veilig!
+    if (!titleEl || !textEl || !tagsEl || !contentTitleEl) return;
+
+    // A. BEREKEN STAPPEN VAN VANDAAG
+    const todaySteps = logs
+        .filter(log => (log.type === 'steps' || log.type === 'stappen') && log.date === today)
+        .reduce((sum, log) => sum + log.value, 0);
+
+    // CONTROLEER STAPPEN-DOEL
+    if (todaySteps < 10000) {
+        const overig = 10000 - todaySteps;
+        titleEl.innerText = "Dagelijkse Activiteit";
+        contentTitleEl.innerText = "👣 Stappen Doel Behalen";
+        textEl.innerText = `Je hebt vandaag ${todaySteps.toLocaleString()} stappen gezet. Loop nog ${overig.toLocaleString()} stappen om je dagelijkse doel te behalen!`;
+        tagsEl.innerHTML = `<span class="suggestion-tag">Cardio</span><span class="suggestion-tag">Gezondheid</span><span class="suggestion-tag">Vandaag</span>`;
+        return; 
+    }
+
+    // B. CONTROLEER WORKOUTS VAN DEZE WEEK
+    const strengthWorkouts = logs.filter(log => log.type === 'strength' || log.type === 'workout');
+    const heeftBorstGedaan = strengthWorkouts.some(w => w.subActivity && w.subActivity.toLowerCase().includes('borst') || w.subActivity.toLowerCase().includes('bench'));
+    const heeftRugGedaan = strengthWorkouts.some(w => w.subActivity && w.subActivity.toLowerCase().includes('rug') || w.subActivity.toLowerCase().includes('pull'));
+    const heeftBenenGedaan = strengthWorkouts.some(w => w.subActivity && w.subActivity.toLowerCase().includes('been') || w.subActivity.toLowerCase().includes('squat'));
+
+    if (heeftBorstGedaan && !heeftRugGedaan) {
+        titleEl.innerText = "Aanbevolen Trainingsprogramma";
+        contentTitleEl.innerText = "🏋️ Rug & Achterkant Schouders";
+        textEl.innerText = "Je hebt deze week je borst al aangepakt. Focus vandaag op Rows, Pull-ups en Lat Pulldowns voor een gebalanceerde groei.";
+        tagsEl.innerHTML = `<span class="suggestion-tag">Rug</span><span class="suggestion-tag">Hypertrofie</span><span class="suggestion-tag">Kracht</span>`;
+    } else if (heeftRugGedaan && !heeftBenenGedaan) {
+        titleEl.innerText = "Aanbevolen Trainingsprogramma";
+        contentTitleEl.innerText = "🍗 Sla Leg Day Niet Over!";
+        textEl.innerText = "Je bovenlichaam heeft deze week vuur gehad. Vandaag is het tijd voor Squats, Leg Presses en Lunges. Bouw die basis op!";
+        tagsEl.innerHTML = `<span class="suggestion-tag">Benen</span><span class="suggestion-tag">Kracht</span><span class="suggestion-tag">Focus</span>`;
+    } else {
+        titleEl.innerText = "Aanbevolen Trainingsprogramma";
+        contentTitleEl.innerText = "💪 Bovenlichaam Kracht";
+        textEl.innerText = "Geen dringende tekorten! Aanbevolen basistraining: Bench Press - Pull-ups - OHP - Rows — 4×8";
+        tagsEl.innerHTML = `<span class="suggestion-tag">45 Min</span><span class="suggestion-tag">Gemiddeld</span><span class="suggestion-tag">Hypertrofie</span>`;
+    }
+}
+
+// --- GRAFIEK & GESCHIEDENIS RENDERING ---
 function renderChart() {
-    const metric = document.getElementById("chart-metric-select").value;
+    const metricSelect = document.getElementById("chart-metric-select");
     const svg = document.getElementById("dynamic-svg");
     const tooltip = document.getElementById("chart-tooltip");
+    
+    if (!metricSelect || !svg) return; // Veilige check
+    
+    const metric = metricSelect.value;
     const langData = I18N[currentLang];
     
     svg.innerHTML = "";
     
-    let chartLogs = logs.filter(l => l.type === metric);
+    let chartLogs = logs.filter(l => l.type === metric || (metric === 'steps' && l.type === 'stappen'));
     chartLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    document.getElementById("chart-title-text").textContent = langData.chartTitles[metric];
+    const titleText = document.getElementById("chart-title-text");
+    if (titleText && langData.chartTitles[metric]) titleText.textContent = langData.chartTitles[metric];
+
+    const currentValEl = document.getElementById("chart-current-value");
+    const diffValEl = document.getElementById("chart-diff-value");
 
     if (chartLogs.length === 0) {
         svg.innerHTML = `<text x="150" y="65" fill="#434347" font-size="11" font-weight="600" text-anchor="middle">Geen data / No data found.</text>`;
-        document.getElementById("chart-current-value").textContent = "--";
-        document.getElementById("chart-diff-value").textContent = "";
+        if (currentValEl) currentValEl.textContent = "--";
+        if (diffValEl) diffValEl.textContent = "";
         return;
     }
 
     const latestLog = chartLogs[chartLogs.length - 1];
     const firstLog = chartLogs[0];
-    const unit = langData.units[metric];
+    const unit = langData.units[metric] || "";
     const numLocale = currentLang === 'nl' ? 'nl-NL' : 'en-US';
     
-    document.getElementById("chart-current-value").textContent = latestLog.value.toLocaleString(numLocale) + unit;
+    if (currentValEl) currentValEl.textContent = latestLog.value.toLocaleString(numLocale) + unit;
     
     if (chartLogs.length > 1) {
         const diff = latestLog.value - firstLog.value;
         const sign = diff >= 0 ? "+" : "";
-        document.getElementById("chart-diff-value").textContent = `${sign}${diff.toLocaleString(numLocale)}${unit}`;
-        document.getElementById("chart-diff-value").style.color = (diff <= 0 && metric === 'weight') || (diff >= 0 && metric !== 'weight') ? '#CCFF00' : '#71717A';
+        if (diffValEl) {
+            diffValEl.textContent = `${sign}${diff.toLocaleString(numLocale)}${unit}`;
+            diffValEl.style.color = (diff <= 0 && metric === 'weight') || (diff >= 0 && metric !== 'weight') ? '#CCFF00' : '#71717A';
+        }
     } else {
-        document.getElementById("chart-diff-value").textContent = langData.startPoint;
-        document.getElementById("chart-diff-value").style.color = "#71717A";
+        if (diffValEl) {
+            diffValEl.textContent = langData.startPoint;
+            diffValEl.style.color = "#71717A";
+        }
     }
 
-    // Viewbox schaling berekeningen (300x120)
+    // Viewbox schaling
     const paddingLeft = 45, paddingRight = 20, paddingTop = 15, paddingBottom = 20;
     const width = 300 - paddingLeft - paddingRight;
     const height = 120 - paddingTop - paddingBottom;
@@ -413,7 +536,7 @@ function renderChart() {
         return { x, y, log };
     });
 
-    // Teken Y-as Grid
+    // Teken Y-as
     const axisLabels = [maxY, (maxY + minY) / 2, minY];
     const axisYPos = [paddingTop, paddingTop + height / 2, paddingTop + height];
     axisLabels.forEach((label, i) => {
@@ -425,7 +548,7 @@ function renderChart() {
         svg.appendChild(txt);
     });
 
-    // Teken Grafieklijn
+    // Teken Lijn
     let d = `M ${points[0].x} ${points[0].y}`;
     for (let i = 1; i < points.length; i++) { d += ` L ${points[i].x} ${points[i].y}`; }
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -436,7 +559,7 @@ function renderChart() {
     path.setAttribute("stroke-linecap", "round");
     svg.appendChild(path);
 
-    // Teken Data-stipjes + Figma Tooltip logica
+    // Teken Stipjes + Tooltips
     points.forEach(pt => {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", pt.x);
@@ -444,28 +567,31 @@ function renderChart() {
         circle.setAttribute("r", "3.5");
         circle.setAttribute("fill", "#CCFF00");
 
-        circle.addEventListener("mouseover", () => {
-            const dateObj = new Date(pt.log.date);
-            const formattedDate = dateObj.toLocaleDateString(currentLang === 'nl' ? 'nl-NL' : 'en-US', { day: 'numeric', month: 'short' });
-            const contextText = pt.log.subActivity ? `<br><span style="color:#71717A; font-size:10px;">${pt.log.subActivity}</span>` : "";
+        if (tooltip) {
+            circle.addEventListener("mouseover", () => {
+                const dateObj = new Date(pt.log.date);
+                const formattedDate = dateObj.toLocaleDateString(numLocale, { day: 'numeric', month: 'short' });
+                const contextText = pt.log.subActivity ? `<br><span style="color:#71717A; font-size:10px;">${pt.log.subActivity}</span>` : "";
 
-            tooltip.innerHTML = `<strong>${pt.log.value.toLocaleString(numLocale)} ${unit}</strong><br><span style="color:#A1A1AA; font-size:10px;">${formattedDate}</span>${contextText}`;
-            tooltip.style.display = "block";
+                tooltip.innerHTML = `<strong>${pt.log.value.toLocaleString(numLocale)} ${unit}</strong><br><span style="color:#A1A1AA; font-size:10px;">${formattedDate}</span>${contextText}`;
+                tooltip.style.display = "block";
 
-            const containerRect = svg.parentElement.getBoundingClientRect();
-            const circleRect = circle.getBoundingClientRect();
-            tooltip.style.left = `${circleRect.left - containerRect.left + (circleRect.width / 2)}px`;
-            tooltip.style.top = `${circleRect.top - containerRect.top}px`;
-        });
+                const containerRect = svg.parentElement.getBoundingClientRect();
+                const circleRect = circle.getBoundingClientRect();
+                tooltip.style.left = `${circleRect.left - containerRect.left + (circleRect.width / 2)}px`;
+                tooltip.style.top = `${circleRect.top - containerRect.top}px`;
+            });
 
-        circle.addEventListener("mouseout", () => { tooltip.style.display = "none"; });
+            circle.addEventListener("mouseout", () => { tooltip.style.display = "none"; });
+        }
         svg.appendChild(circle);
     });
 }
 
-// --- HISTORY LOG CONSOLE RENDERING ---
 function renderHistory() {
     const container = document.getElementById("history-container");
+    if (!container) return; // Veilige stop
+
     const langData = I18N[currentLang];
     container.innerHTML = "";
 
@@ -491,11 +617,11 @@ function renderHistory() {
 
         const extraContextText = log.subActivity ? ` <span style="color: #71717A; font-size: 12px; font-weight:400;">(${log.subActivity}${intensityBadge})</span>` : "";
         
-        if (log.type === "steps") displayType = (currentLang === 'nl' ? "👣 STAPPEN" : "👣 STEPS") + extraContextText;
+        if (log.type === "steps" || log.type === "stappen") displayType = (currentLang === 'nl' ? "👣 STAPPEN" : "👣 STEPS") + extraContextText;
         if (log.type === "calories") displayType = (currentLang === 'nl' ? "🔥 CALORIEËN" : "🔥 CALORIES") + extraContextText;
         if (log.type === "weight") displayType = (currentLang === 'nl' ? "📉 GEWICHT" : "📉 WEIGHT") + extraContextText;
-        if (log.type === "strength") displayType = `🏋️ ${log.subActivity.toUpperCase()}${intensityBadge}`;
-        if (log.type === "cardio") displayType = `🏃 ${log.subActivity.toUpperCase()}${intensityBadge}`;
+        if (log.type === "strength") displayType = `🏋️ ${log.subActivity ? log.subActivity.toUpperCase() : "KRACHT"}${intensityBadge}`;
+        if (log.type === "cardio") displayType = `🏃 ${log.subActivity ? log.subActivity.toUpperCase() : "CARDIO"}${intensityBadge}`;
 
         const dateObj = new Date(log.date);
         const formattedDate = dateObj.toLocaleDateString(numLocale, { day: 'numeric', month: 'short', year: 'numeric' });
@@ -515,19 +641,18 @@ function renderHistory() {
     });
 }
 
+// GLOBALE FUNCTIES VOOR INLINE ONCLICK (EDIT/DELETE)
 window.deleteLog = function(id) {
     if (confirm(I18N[currentLang].confirmDelete)) {
         logs = logs.filter(log => log.id !== id);
-        if (editLogId === id) {
-            editLogId = null;
-            document.getElementById("log-form").reset();
-            document.getElementById("log-type").disabled = false;
-        }
+        if (editLogId === id) resetForm();
+        
         saveToLocalStorage();
         updateLanguageUI();
         updateDashboardStats();
         renderHistory();
         renderChart();
+        updateDynamicSuggestion();
     }
 };
 
@@ -540,173 +665,18 @@ window.editLog = function(id) {
     document.getElementById("log-type").value = logToEdit.type;
     document.getElementById("log-date").value = logToEdit.date;
     document.getElementById("log-value").value = logToEdit.value;
-    document.getElementById("log-sub-activity").value = logToEdit.subActivity || "";
-    if (logToEdit.intensity) {
-        document.getElementById("log-intensity").value = logToEdit.intensity;
-    }
+    
+    const subActivityInput = document.getElementById("log-sub-activity");
+    if (subActivityInput) subActivityInput.value = logToEdit.subActivity || "";
+    
+    const intensityInput = document.getElementById("log-intensity");
+    if (intensityInput && logToEdit.intensity) intensityInput.value = logToEdit.intensity;
 
     document.getElementById("log-type").disabled = true;
     
     updateLanguageUI();
     setupDynamicPlaceholders();
     
-    document.querySelector('[data-screen="screen-logs"]').click();
+    const addLogScreen = document.querySelector('[data-screen="screen-add"]');
+    if (addLogScreen) addLogScreen.click();
 };
-
-function setupSettings() {
-    document.getElementById("clear-data-btn").addEventListener("click", () => {
-        if (confirm(I18N[currentLang].confirmClear)) {
-            logs = [];
-            saveToLocalStorage();
-            updateDashboardStats();
-            renderHistory();
-            renderChart();
-            alert(I18N[currentLang].clearSuccess);
-        }
-    });
-}
-
-function saveToLocalStorage() {
-    localStorage.setItem('gymlock_logs', JSON.stringify(logs));
-}
-
-// --- 1. SCHERM LOGICA VOOR WORKOUT VELDEN ---
-function toggleLogFields() {
-    const logType = document.getElementById('log-type').value;
-    const standardGroup = document.getElementById('standard-input-group');
-    const workoutGroup = document.getElementById('workout-input-group');
-
-    if (logType === 'workout') {
-        standardGroup.style.display = 'none';
-        workoutGroup.style.display = 'flex';
-    } else {
-        standardGroup.style.display = 'block';
-        workoutGroup.style.display = 'none';
-    }
-}
-
-function addExerciseRow() {
-    const container = document.getElementById('exercise-rows');
-    const newRow = document.createElement('div');
-    newRow.className = 'exercise-row';
-    newRow.innerHTML = `
-        <input type="text" class="ex-name" placeholder="Oefening">
-        <input type="number" class="ex-sets" placeholder="Sets">
-        <input type="number" class="ex-reps" placeholder="Reps">
-    `;
-    container.appendChild(newRow);
-}
-
-// --- 2. DE LOGS OPSLAAN (INCLUSIEF WORKOUTS) ---
-function saveLog() {
-    const logType = document.getElementById('log-type').value;
-    const today = new Date().toISOString().split('T')[0]; // Formaat: YYYY-MM-DD
-    
-    // Haal bestaande logs op uit localStorage
-    let logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
-    let logEntry = { date: today, type: logType };
-
-    if (logType === 'workout') {
-        const workoutType = document.getElementById('workout-type').value;
-        const rows = document.querySelectorAll('.exercise-row');
-        let exercises = [];
-
-        rows.forEach(row => {
-            const name = row.querySelector('.ex-name').value;
-            const sets = row.querySelector('.ex-sets').value;
-            const reps = row.querySelector('.ex-reps').value;
-            if (name && sets && reps) {
-                exercises.push({ name, sets, reps });
-            }
-        });
-
-        if (exercises.length === 0) {
-            alert('Voer tenminste één geldige oefening in!');
-            return;
-        }
-
-        logEntry.workoutType = workoutType;
-        logEntry.exercises = exercises;
-    } else {
-        const val = document.getElementById('log-value').value;
-        if (!val) {
-            alert('Vul een waarde in!');
-            return;
-        }
-        logEntry.value = Number(val);
-    }
-
-    logs.push(logEntry);
-    localStorage.setItem('gymlock_logs', JSON.setItem ? JSON.stringify(logs) : JSON.stringify(logs));
-    
-    alert('Succesvol opgeslagen!');
-    
-    // Reset invoervelden
-    if(document.getElementById('log-value')) document.getElementById('log-value').value = '';
-    document.getElementById('exercise-rows').innerHTML = `
-        <div class="exercise-row">
-            <input type="text" class="ex-name" placeholder="Oefening (bijv. Bench Press)">
-            <input type="number" class="ex-sets" placeholder="Sets">
-            <input type="number" class="ex-reps" placeholder="Reps">
-        </div>
-    `;
-
-    // Update direct het dashboard en de suggesties
-    initDashboard();
-}
-
-function updateDynamicSuggestion() {
-    const logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
-    
-    // Haal de datum van vandaag op in lokale tijd (YYYY-MM-DD)
-    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
-    const today = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
-
-    // Haal alle DOM elementen veilig op
-    const titleEl = document.getElementById('suggestion-title');
-    const contentTitleEl = document.getElementById('suggestion-content-title');
-    const textEl = document.getElementById('suggestion-text');
-    const tagsEl = document.getElementById('suggestion-tags');
-
-    // CRUCIALE FIX: Als de elementen niet op het huidige scherm staan, stop gerust zonder te crashen!
-    if (!titleEl || !textEl || !tagsEl || !contentTitleEl) return;
-
-    // A. BEREKEN STAPPEN VAN VANDAAG
-    const todaySteps = logs
-        .filter(log => log.type === 'stappen' && log.date === today)
-        .reduce((sum, log) => sum + log.value, 0);
-
-    // CONTROLEER STAPPEN-DOEL (10.000 stappen)
-    if (todaySteps < 10000) {
-        const overig = 10000 - todaySteps;
-        titleEl.innerText = "Dagelijkse Activiteit";
-        contentTitleEl.innerText = "👣 Stappen Doel Behalen";
-        textEl.innerText = `Je hebt vandaag ${todaySteps.toLocaleString()} stappen gezet. Loop nog ${overig.toLocaleString()} stappen om je dagelijkse doel te behalen!`;
-        tagsEl.innerHTML = `<span class="suggestion-tag">Cardio</span><span class="suggestion-tag">Gezondheid</span><span class="suggestion-tag">Vandaag</span>`;
-        return; 
-    }
-
-    // B. CONTROLEER WORKOUTS VAN DEZE WEEK
-    const recentWorkouts = logs.filter(log => log.type === 'workout');
-    const heeftBorstGedaan = recentWorkouts.some(w => w.workoutType === 'Borst');
-    const heeftRugGedaan = recentWorkouts.some(w => w.workoutType === 'Rug');
-    const heeftBenenGedaan = recentWorkouts.some(w => w.workoutType === 'Benen');
-
-    if (heeftBorstGedaan && !heeftRugGedaan) {
-        titleEl.innerText = "Aanbevolen Trainingsprogramma";
-        contentTitleEl.innerText = "🏋️ Rug & Achterkant Schouders (Back Day)";
-        textEl.innerText = "Je hebt deze week je borst al aangepakt, maar je rug nog niet. Focus vandaag op Rows, Pull-ups en Lat Pulldowns voor een gebalanceerde groei.";
-        tagsEl.innerHTML = `<span class="suggestion-tag">Rug</span><span class="suggestion-tag">Hypertrofie</span><span class="suggestion-tag">Kracht</span>`;
-    } else if (heeftRugGedaan && !heeftBenenGedaan) {
-        titleEl.innerText = "Aanbevolen Trainingsprogramma";
-        contentTitleEl.innerText = "🍗 Sla Leg Day Niet Over!";
-        textEl.innerText = "Je bovenlichaam heeft deze week vuur gehad. Vandaag is het tijd voor Squats, Leg Presses en Lunges. Bouw die basis op!";
-        tagsEl.innerHTML = `<span class="suggestion-tag">Benen</span><span class="suggestion-tag">Kracht</span><span class="suggestion-tag">Focus</span>`;
-    } else {
-        // Standaard suggestie
-        titleEl.innerText = "Aanbevolen Trainingsprogramma";
-        contentTitleEl.innerText = "💪 Bovenlichaam Kracht";
-        textEl.innerText = "Geen dringende tekorten deze week! Aanbevolen basistraining: Bench Press - Pull-ups - OHP - Rows — 4×8";
-        tagsEl.innerHTML = `<span class="suggestion-tag">45 Min</span><span class="suggestion-tag">Gemiddeld</span><span class="suggestion-tag">Hypertrofie</span>`;
-    }
-}
