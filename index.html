@@ -6,6 +6,11 @@
     <title>GymLock Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 
@@ -15,23 +20,23 @@
             <header class="app-header">
                 <div class="logo-area">
                     <span class="logo-text">GymLock</span>
-                    <span class="lang-badge">EN</span>
+                    <button id="lang-toggle" class="lang-badge">EN</button>
                 </div>
             </header>
 
             <section class="suggestion-card">
-                <span class="card-tag">SUGGESTION OF THE DAY</span>
-                <h2 class="card-main-title">Suggested Workout Program</h2>
+                <span class="card-tag" data-i18n="sugg_tag">SUGGESTION OF THE DAY</span>
+                <h2 class="card-main-title" data-i18n="sugg_title">Suggested Workout Program</h2>
                 
                 <div class="inner-workout-box">
-                    <h3>Upper Body Strength</h3>
+                    <h3 data-i18n="sugg_workout_name">Upper Body Strength</h3>
                     <p>Bench Press - Pull-ups - OHP - Rows — 4x8</p>
                 </div>
 
                 <div class="badge-row">
-                    <span class="workout-badge">45 MIN</span>
-                    <span class="workout-badge">INTERMEDIATE</span>
-                    <span class="workout-badge">HYPERTROPHY</span>
+                    <span class="workout-badge" data-i18n="badge_time">45 MIN</span>
+                    <span class="workout-badge" data-i18n="badge_level">INTERMEDIATE</span>
+                    <span class="workout-badge" data-i18n="badge_type">HYPERTROPHY</span>
                 </div>
             </section>
 
@@ -39,37 +44,37 @@
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">👣</span>
-                        <span class="stat-title">STEPS</span>
+                        <span class="stat-title" data-i18n="stat_steps">STEPS</span>
                     </div>
                     <div class="stat-number" id="stat-steps">0</div>
-                    <div class="stat-footer">vandaag</div>
+                    <div class="stat-footer" data-i18n="stat_steps_footer">vandaag</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">🔥</span>
-                        <span class="stat-title">CALORIES</span>
+                        <span class="stat-title" data-i18n="stat_calories">CALORIES</span>
                     </div>
                     <div class="stat-number" id="stat-calories">0</div>
-                    <div class="stat-footer">kcal vandaag</div>
+                    <div class="stat-footer" data-i18n="stat_calories_footer">kcal vandaag</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">🏋️</span>
-                        <span class="stat-title">WORKOUTS</span>
+                        <span class="stat-title" data-i18n="stat_workouts">WORKOUTS</span>
                     </div>
                     <div class="stat-number" id="stat-workouts">0</div>
-                    <div class="stat-footer">deze week</div>
+                    <div class="stat-footer" data-i18n="stat_workouts_footer">deze week</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">📉</span>
-                        <span class="stat-title">WEIGHT</span>
+                        <span class="stat-title" data-i18n="stat_weight">WEIGHT</span>
                     </div>
                     <div class="stat-number" id="stat-weight">--</div>
-                    <div class="stat-footer">laatste log</div>
+                    <div class="stat-footer" data-i18n="stat_weight_footer">laatste log</div>
                 </div>
             </section>
 
@@ -77,9 +82,9 @@
                 <div class="chart-header-row">
                     <span class="chart-tag" id="chart-title-text">PROGRESS CHART — WEIGHT TRACKER</span>
                     <select id="chart-metric-select" class="chart-select">
-                        <option value="weight">📉 Gewicht (kg)</option>
-                        <option value="steps">👣 Stappen</option>
-                        <option value="calories">🔥 Calorieën (kcal)</option>
+                        <option value="weight" data-i18n="opt_weight">📉 Gewicht (kg)</option>
+                        <option value="steps" data-i18n="opt_steps">👣 Stappen</option>
+                        <option value="calories" data-i18n="opt_calories">🔥 Calorieën (kcal)</option>
                     </select>
                 </div>
                 
@@ -103,58 +108,58 @@
             
             <form id="log-form" class="log-form">
                 <div class="input-group">
-                    <label>Type activiteit</label>
+                    <label data-i18n="label_type">Type activiteit</label>
                     <select id="log-type">
-                        <option value="steps">👣 Stappen</option>
-                        <option value="calories">🔥 Calorieën (kcal)</option>
-                        <option value="weight">📉 Lichaamsgewicht (kg)</option>
-                        <option value="strength">🏋️ Krachttraining (Oefening)</option>
-                        <option value="cardio">🏃 Cardio (Sessie)</option>
+                        <option value="steps" data-i18n="opt_steps_log">👣 Stappen</option>
+                        <option value="calories" data-i18n="opt_calories_log">🔥 Calorieën (kcal)</option>
+                        <option value="weight" data-i18n="opt_weight_log">📉 Lichaamsgewicht (kg)</option>
+                        <option value="strength" data-i18n="opt_strength_log">🏋️ Krachttraining (Oefening)</option>
+                        <option value="cardio" data-i18n="opt_cardio_log">🏃 Cardio (Sessie)</option>
                     </select>
                 </div>
 
                 <div class="input-group" id="sub-activity-group">
-                    <label id="sub-activity-label">Specifieke activiteit / Context</label>
-                    <input type="text" id="log-sub-activity" placeholder="Bijv. Ochtendwandeling">
+                    <label id="sub-activity-label" for="log-sub-activity">Specifieke activiteit / Context</label>
+                    <input type="text" id="log-sub-activity" placeholder="Voer activiteit of context in" title="Specifieke activiteit of context invoeren">
                 </div>
 
                 <div class="input-group" id="intensity-group" style="display: none;">
-                    <label>Intensiteit / Zwaarte</label>
+                    <label data-i18n="label_intensity">Intensiteit / Zwaarte</label>
                     <select id="log-intensity">
-                        <option value="light">🟢 Licht (RPE 6-7 / Hersteltraining)</option>
-                        <option value="medium" selected>🟡 Gemiddeld (RPE 8 / Normale werkset)</option>
-                        <option value="heavy">🔴 Zwaar (RPE 9-10 / Fail set of PR poging)</option>
+                        <option value="light" data-i18n="opt_light">🟢 Licht (RPE 6-7 / Hersteltraining)</option>
+                        <option value="medium" selected data-i18n="opt_medium">🟡 Gemiddeld (RPE 8 / Normale werkset)</option>
+                        <option value="heavy" data-i18n="opt_heavy">🔴 Zwaar (RPE 9-10 / Fail set of PR poging)</option>
                     </select>
                 </div>
 
                 <div class="input-group">
-                    <label for="log-date">Datum van activiteit</label>
-                    <input type="date" id="log-date" title="Selecteer de datum van activiteit" required>
+                    <label data-i18n="label_date">Datum van activiteit</label>
+                    <input type="date" id="log-date" required title="Selecteer datum van activiteit" placeholder="YYYY-MM-DD">
                 </div>
 
                 <div class="input-group">
-                    <label id="value-label">Aantal stappen</label>
-                    <input type="number" id="log-value" step="any" placeholder="Bijv. 10000" required>
+                    <label id="value-label" data-i18n="label_value">Aantal stappen</label>
+                    <input type="number" id="log-value" step="any" required aria-labelledby="value-label" title="Aantal stappen of waarde invoeren" placeholder="Voer aantal / waarde in">
                 </div>
 
                 <button type="submit" id="submit-btn" class="submit-btn">LOG OPSLAAN</button>
-                <button type="button" id="cancel-edit-btn" class="cancel-btn" style="display: none;">ANNULEREN</button>
+                <button type="button" id="cancel-edit-btn" class="cancel-btn">ANNULEREN</button>
             </form>
 
             <div class="history-section">
-                <h3>Loggeschiedenis</h3>
+                <h3 data-i18n="history_title">Loggeschiedenis</h3>
                 <div id="history-container"></div>
             </div>
         </div>
 
         <div id="screen-settings" class="app-screen">
             <header class="app-header">
-                <span class="logo-text">Settings</span>
+                <span class="logo-text" data-i18n="settings_header">Settings</span>
             </header>
             <div style="text-align: center; padding: 40px 20px;">
                 <p style="color: #71717A; font-size: 15px; margin-bottom: 8px;">GymLock v1.2.0</p>
-                <p style="color: #434347; font-size: 13px;">Interactieve SVG-grafiekengine en RPE intensiteit-ondersteuning.</p>
-                <button id="clear-data-btn" class="danger-btn" style="margin-top: 30px;">ALLE DATA WISSEN</button>
+                <p style="color: #434347; font-size: 13px;" data-i18n="settings_engine">Interactieve SVG-grafiekengine en RPE intensiteit-ondersteuning.</p>
+                <button id="clear-data-btn" class="danger-btn" data-i18n="btn_clear">ALLE DATA WISSEN</button>
             </div>
         </div>
 
@@ -162,9 +167,9 @@
 
     <div class="bottom-nav-wrapper">
         <nav class="bottom-nav">
-            <button class="nav-btn active" data-screen="screen-dashboard">DASHBOARD</button>
-            <button class="nav-btn" data-screen="screen-logs">LOGS</button>
-            <button class="nav-btn" data-screen="screen-settings">SETTINGS</button>
+            <button class="nav-btn active" data-screen="screen-dashboard" data-i18n="nav_dashboard">DASHBOARD</button>
+            <button class="nav-btn" data-screen="screen-logs" data-i18n="nav_logs">LOGS</button>
+            <button class="nav-btn" data-screen="screen-settings" data-i18n="nav_settings">SETTINGS</button>
         </nav>
     </div>
 
