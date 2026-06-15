@@ -6,12 +6,6 @@
     <title>GymLock Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#09090B" media="(prefers-color-scheme: dark)">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 
@@ -20,60 +14,62 @@
         <div id="screen-dashboard" class="app-screen active">
             <header class="app-header">
                 <div class="logo-area">
-                    <img src="logo.svg" alt="GymLock Logo" class="logo-icon">
                     <span class="logo-text">GymLock</span>
-                    <button id="lang-toggle" class="lang-badge">EN</button>
+                    <span class="lang-badge">EN</span>
                 </div>
             </header>
 
-            <div class="suggestion-card">
-                <span class="suggestion-subtitle">SUGGESTIE VAN DE DAG</span>
-                <h2 id="suggestion-title">Aanbevolen Trainingsprogramma</h2>
+            <section class="suggestion-card">
+                <span class="card-tag">SUGGESTION OF THE DAY</span>
+                <h2 class="card-main-title">Suggested Workout Program</h2>
                 
-                <div class="suggestion-inner-card">
-                    <div id="suggestion-content-title" style="font-weight: 700; color: #ffffff; margin-bottom: 5px;">Laden...</div>
-                    <div id="suggestion-text" style="color: #a1a1aa; font-size: 14px; line-height: 1.4;">Jouw persoonlijke suggestie wordt berekend...</div>
+                <div class="inner-workout-box">
+                    <h3>Upper Body Strength</h3>
+                    <p>Bench Press - Pull-ups - OHP - Rows — 4x8</p>
                 </div>
-                
-                <div id="suggestion-tags" class="suggestion-tags-container">
-                    </div>
-            </div>
+
+                <div class="badge-row">
+                    <span class="workout-badge">45 MIN</span>
+                    <span class="workout-badge">INTERMEDIATE</span>
+                    <span class="workout-badge">HYPERTROPHY</span>
+                </div>
+            </section>
 
             <section class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">👣</span>
-                        <span class="stat-title" data-i18n="stat_steps">STEPS</span>
+                        <span class="stat-title">STEPS</span>
                     </div>
                     <div class="stat-number" id="stat-steps">0</div>
-                    <div class="stat-footer" data-i18n="stat_steps_footer">vandaag</div>
+                    <div class="stat-footer">vandaag</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">🔥</span>
-                        <span class="stat-title" data-i18n="stat_calories">CALORIES</span>
+                        <span class="stat-title">CALORIES</span>
                     </div>
                     <div class="stat-number" id="stat-calories">0</div>
-                    <div class="stat-footer" data-i18n="stat_calories_footer">kcal vandaag</div>
+                    <div class="stat-footer">kcal vandaag</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">🏋️</span>
-                        <span class="stat-title" data-i18n="stat_workouts">WORKOUTS</span>
+                        <span class="stat-title">WORKOUTS</span>
                     </div>
                     <div class="stat-number" id="stat-workouts">0</div>
-                    <div class="stat-footer" data-i18n="stat_workouts_footer">deze week</div>
+                    <div class="stat-footer">deze week</div>
                 </div>
 
                 <div class="stat-box">
                     <div class="stat-header">
                         <span class="stat-icon">📉</span>
-                        <span class="stat-title" data-i18n="stat_weight">WEIGHT</span>
+                        <span class="stat-title">WEIGHT</span>
                     </div>
                     <div class="stat-number" id="stat-weight">--</div>
-                    <div class="stat-footer" data-i18n="stat_weight_footer">laatste log</div>
+                    <div class="stat-footer">laatste log</div>
                 </div>
             </section>
 
@@ -81,9 +77,9 @@
                 <div class="chart-header-row">
                     <span class="chart-tag" id="chart-title-text">PROGRESS CHART — WEIGHT TRACKER</span>
                     <select id="chart-metric-select" class="chart-select">
-                        <option value="weight" data-i18n="opt_weight">📉 Gewicht (kg)</option>
-                        <option value="steps" data-i18n="opt_steps">👣 Stappen</option>
-                        <option value="calories" data-i18n="opt_calories">🔥 Calorieën (kcal)</option>
+                        <option value="weight">📉 Gewicht (kg)</option>
+                        <option value="steps">👣 Stappen</option>
+                        <option value="calories">🔥 Calorieën (kcal)</option>
                     </select>
                 </div>
                 
@@ -100,66 +96,65 @@
             </section>
         </div>
 
-        <div id="screen-logs" class="screen" style="display: none;">
-            <div class="card" style="max-width: 500px; margin: 0 auto;">
-                <h2 style="color: #CCFF00; margin-bottom: 20px; font-weight: 700;">Log toevoegen</h2>
-                
-                <form id="log-form" onsubmit="event.preventDefault();">
-                    
-                    <div class="input-group">
-                        <label for="log-type">Type log</label>
-                        <select id="log-type" onchange="toggleLogFields()">
-                            <option value="stappen">👣 Stappen</option>
-                            <option value="calorieen">🔥 Calorieën (kcal)</option>
-                            <option value="gewicht">📉 Gewicht (kg)</option>
-                            <option value="workout">🏋️ Krachttraining</option>
-                        </select>
-                    </div>
-
-                    <div id="standard-input-group" class="input-group">
-                        <label for="log-value">Nieuwe Waarde</label>
-                        <input type="number" id="log-value" placeholder="Bijv. 8500 of 79.5">
-                    </div>
-
-                    <div id="workout-input-group" class="input-group" style="display: none;">
-                        <label for="workout-type">Focus / Spiergroep</label>
-                        <select id="workout-type">
-                            <option value="Borst">Borst (Chest Day)</option>
-                            <option value="Rug">Rug (Back Day)</option>
-                            <option value="Benen">Benen (Leg Day)</option>
-                            <option value="Schouders/Armen">Schouders & Armen</option>
-                        </select>
-
-                        <label style="margin-top: 15px; color: #a1a1aa; font-size: 14px;">Oefeningen invoeren</label>
-                        <div id="exercise-rows">
-                            <div class="exercise-row">
-                                <input type="text" class="ex-name" placeholder="Oefening (bijv. Bench Press)">
-                                <input type="number" class="ex-sets" placeholder="Sets">
-                                <input type="number" class="ex-reps" placeholder="Reps">
-                            </div>
-                        </div>
-                        <button type="button" class="btn-secondary" onclick="addExerciseRow()">+ Oefening toevoegen</button>
-                    </div>
-
-                    <button type="submit" id="log-submit" class="btn-primary" onclick="saveLog()" style="width: 100%; margin-top: 10px;">LOG OPSLAAN</button>
-                </form>
-            </div>
+        <div id="screen-logs" class="app-screen">
+            <header class="app-header">
+                <span class="logo-text" id="form-title">Add <span style="color: #CCFF00;">Log</span></span>
+            </header>
             
-            <div class="card" style="max-width: 500px; margin: 20px auto 0 auto; text-align: left;">
-                <h3 style="color: #ffffff; margin-bottom: 15px; font-weight: 600;">Loggeschiedenis</h3>
-                <div id="log-history-list" style="color: #a1a1aa; font-size: 14px;">
-                    </div>
+            <form id="log-form" class="log-form">
+                <div class="input-group">
+                    <label>Type activiteit</label>
+                    <select id="log-type">
+                        <option value="steps">👣 Stappen</option>
+                        <option value="calories">🔥 Calorieën (kcal)</option>
+                        <option value="weight">📉 Lichaamsgewicht (kg)</option>
+                        <option value="strength">🏋️ Krachttraining (Oefening)</option>
+                        <option value="cardio">🏃 Cardio (Sessie)</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="sub-activity-group">
+                    <label id="sub-activity-label">Specifieke activiteit / Context</label>
+                    <input type="text" id="log-sub-activity" placeholder="Bijv. Ochtendwandeling">
+                </div>
+
+                <div class="input-group" id="intensity-group" style="display: none;">
+                    <label>Intensiteit / Zwaarte</label>
+                    <select id="log-intensity">
+                        <option value="light">🟢 Licht (RPE 6-7 / Hersteltraining)</option>
+                        <option value="medium" selected>🟡 Gemiddeld (RPE 8 / Normale werkset)</option>
+                        <option value="heavy">🔴 Zwaar (RPE 9-10 / Fail set of PR poging)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="log-date">Datum van activiteit</label>
+                    <input type="date" id="log-date" title="Selecteer de datum van activiteit" required>
+                </div>
+
+                <div class="input-group">
+                    <label id="value-label">Aantal stappen</label>
+                    <input type="number" id="log-value" step="any" placeholder="Bijv. 10000" required>
+                </div>
+
+                <button type="submit" id="submit-btn" class="submit-btn">LOG OPSLAAN</button>
+                <button type="button" id="cancel-edit-btn" class="cancel-btn" style="display: none;">ANNULEREN</button>
+            </form>
+
+            <div class="history-section">
+                <h3>Loggeschiedenis</h3>
+                <div id="history-container"></div>
             </div>
         </div>
 
         <div id="screen-settings" class="app-screen">
             <header class="app-header">
-                <span class="logo-text" data-i18n="settings_header">Settings</span>
+                <span class="logo-text">Settings</span>
             </header>
             <div style="text-align: center; padding: 40px 20px;">
                 <p style="color: #71717A; font-size: 15px; margin-bottom: 8px;">GymLock v1.2.0</p>
-                <p style="color: #434347; font-size: 13px;" data-i18n="settings_engine">Interactieve SVG-grafiekengine en RPE intensiteit-ondersteuning.</p>
-                <button id="clear-data-btn" class="danger-btn" data-i18n="btn_clear">ALLE DATA WISSEN</button>
+                <p style="color: #434347; font-size: 13px;">Interactieve SVG-grafiekengine en RPE intensiteit-ondersteuning.</p>
+                <button id="clear-data-btn" class="danger-btn" style="margin-top: 30px;">ALLE DATA WISSEN</button>
             </div>
         </div>
 
@@ -167,9 +162,9 @@
 
     <div class="bottom-nav-wrapper">
         <nav class="bottom-nav">
-            <button class="nav-btn active" data-screen="screen-dashboard" data-i18n="nav_dashboard">DASHBOARD</button>
-            <button class="nav-btn" data-screen="screen-logs" data-i18n="nav_logs">LOGS</button>
-            <button class="nav-btn" data-screen="screen-settings" data-i18n="nav_settings">SETTINGS</button>
+            <button class="nav-btn active" data-screen="screen-dashboard">DASHBOARD</button>
+            <button class="nav-btn" data-screen="screen-logs">LOGS</button>
+            <button class="nav-btn" data-screen="screen-settings">SETTINGS</button>
         </nav>
     </div>
 

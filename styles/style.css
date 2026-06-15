@@ -1,3 +1,4 @@
+/* --- GLOBAL BASICS --- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -48,26 +49,12 @@ body {
 }
 
 .lang-badge {
-    background-color: #18181B;    /* Donkere achtergrond, net als de dashboard-kaartjes */
-    color: #CCFF00;               /* De felle tekstkleur springt er nu perfect uit */
-    border: 1px solid #CCFF00;    /* Een strakke neon rand eromheen */
-    padding: 3px 8px;
-    border-radius: 6px;
+    border: 1px solid #71717A;
     font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 6px;
     font-weight: 700;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.2s ease-in-out;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lang-badge:hover {
-    background-color: #CCFF00;    /* Keert om bij hover: neon achtergrond... */
-    color: #09090B;               /* ...en pikzwarte letters voor ultiem contrast */
-    box-shadow: 0 0 10px rgba(204, 255, 0, 0.4); /* Geeft een coole glow */
+    color: #CCFF00;
 }
 
 /* --- CARDS --- */
@@ -248,6 +235,7 @@ body {
     font-weight: 600;
 }
 
+/* INTERACTIEVE FIGMA TOOLTIP STYLING */
 .chart-tooltip {
     position: absolute;
     background: #1C1C1E;
@@ -452,126 +440,3 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #CCFF00;
     border: 1.5px solid #CCFF00;
 }
-
-/* Workout invoervelden styling */
-#workout-input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.exercise-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.exercise-row .ex-name {
-    flex: 2; /* Geeft de naam van de oefening meer ruimte */
-}
-
-.exercise-row .ex-sets,
-.exercise-row .ex-reps {
-    flex: 1;
-    text-align: center;
-}
-
-.btn-secondary {
-    background-color: #18181B;
-    color: #CCFF00;
-    border: 1px dashed #CCFF00;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    margin-bottom: 15px;
-    transition: all 0.2s ease;
-}
-
-.btn-secondary:hover {
-    background-color: rgba(204, 255, 0, 0.1);
-}
-
-/* Suggestie Kaart Layout Upgrades */
-.suggestion-subtitle {
-    color: #CCFF00;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 8px;
-}
-
-.suggestion-inner-card {
-    background-color: #18181B; /* Subtiel lichtere achtergrond */
-    border-radius: 12px;
-    padding: 15px;
-    margin: 15px 0;
-    text-align: left;
-}
-
-.suggestion-tags-container {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-/* De strakke neon tags onderaan */
-.suggestion-tag {
-    background-color: rgba(204, 255, 0, 0.05);
-    color: #CCFF00;
-    border: 1px solid rgba(204, 255, 0, 0.3);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-/* Styling voor invoervelden in het Log-scherm */
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-.input-group label {
-    color: #a1a1aa;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.input-group input, 
-.input-group select {
-    background-color: #18181B;
-    border: 1px solid #27272A;
-    color: #ffffff;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-family: inherit;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.input-group input:focus, 
-.input-group select:focus {
-    border-color: #CCFF00;
-}
-
-/* Oefeningen rijen binnen krachttraining */
-.exercise-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.exercise-row .ex-name { flex: 2; }
-.exercise-row .ex-sets, 
-.exercise-row .ex-reps { flex: 1; text-align: center; }
