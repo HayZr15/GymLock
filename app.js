@@ -40,69 +40,64 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLanguageUI();
     updateDashboard();
     renderLogHistory();
-    toggleLogFields(); // Zet formulier in de juiste startpositie
+    toggleLogFields(); 
 });
 
 // ==========================================
-// 3. NAVIGATIE LOGICA
+// 3. NAVIGATIE LOGICA (HERSTELD VOOR CSS)
 // ==========================================
 function setupNavigation() {
     const navButtons = document.querySelectorAll('.nav-btn');
+    const screens = ['screen-dashboard', 'screen-logs', 'screen-settings'];
     
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // 1. Verwijder active class van alle knoppen
+            // Active class op de knoppen wisselen
             navButtons.forEach(b => b.classList.remove('active'));
-            // 2. Voeg active class toe aan geklikte knop
             btn.classList.add('active');
             
-            // 3. Verberg alle schermen
-            const screens = ['screen-dashboard', 'screen-logs', 'screen-settings'];
+            const targetScreenId = btn.getAttribute('data-screen');
+            
             screens.forEach(id => {
                 const screenEl = document.getElementById(id);
                 if (screenEl) {
-                    screenEl.style.display = 'none';
-                    screenEl.classList.remove('active');
+                    if (id === targetScreenId) {
+                        // Toon scherm: Maak display leeg zodat CSS de layout (grid/flex) bepaalt!
+                        screenEl.style.display = ''; 
+                        screenEl.classList.add('active');
+                    } else {
+                        // Verberg de inactieve schermen
+                        screenEl.style.display = 'none';
+                        screenEl.classList.remove('active');
+                    }
                 }
             });
-            
-            // 4. Toon het geselecteerde scherm
-            const targetScreenId = btn.getAttribute('data-screen');
-            const targetScreen = document.getElementById(targetScreenId);
-            if (targetScreen) {
-                targetScreen.style.display = 'block';
-                // Voor dashboard en settings de flex structuur behouden, voor logs block
-                if(targetScreen.classList.contains('app-screen')) {
-                    targetScreen.style.display = 'flex'; 
-                }
-                setTimeout(() => targetScreen.classList.add('active'), 10);
-            }
         });
     });
 }
 
 // ==========================================
-// 4. FORMULIER FUNCTIES (Aangeroepen in HTML)
+// 4. FORMULIER FUNCTIES
 // ==========================================
 window.toggleLogFields = function() {
     const typeSelect = document.getElementById('log-type');
     const stdGroup = document.getElementById('standard-input-group');
     const woGroup = document.getElementById('workout-input-group');
     
-    if (!typeSelect || !stdGroup || !woGroup) return; // Null-guard
+    if (!typeSelect || !stdGroup || !woGroup) return;
 
     if (typeSelect.value === 'workout') {
         stdGroup.style.display = 'none';
-        woGroup.style.display = 'block';
+        woGroup.style.display = '';
     } else {
-        stdGroup.style.display = 'block';
+        stdGroup.style.display = '';
         woGroup.style.display = 'none';
     }
 };
 
 window.addExerciseRow = function() {
     const container = document.getElementById('exercise-rows');
-    if (!container) return; // Null-guard
+    if (!container) return;
 
     const row = document.createElement('div');
     row.className = 'exercise-row';
@@ -146,26 +141,14 @@ window.saveLog = function() {
         newLog.value = parseFloat(valInput);
     }
 
-    // Opslaan
     logs.push(newLog);
     localStorage.setItem('gymlock_logs', JSON.stringify(logs));
     
-    // UI updaten
     updateDashboard();
     renderLogHistory();
     
-    // Formulier resetten
-    document.getElementById('log-value').value = '';
-    const container = document.getElementById('exercise-rows');
-    if(container) {
-        container.innerHTML = `
-            <div class="exercise-row">
-                <input type="text" class="ex-name" placeholder="Oefening (bijv. Bench Press)">
-                <input type="number" class="ex-sets" placeholder="Sets">
-                <input type="number" class="ex-reps" placeholder="Reps">
-            </div>
-        `;
-    }
+    // Reset invoerveld
+    if(document.getElementById('log-value')) document.getElementById('log-value').value = '';
     
     alert("Log succesvol opgeslagen!");
 };
@@ -181,25 +164,20 @@ function updateDashboard() {
     let weightLatest = '--';
     let workoutsWeek = 0;
 
-    // Simpele filter logica
     logs.forEach(log => {
         const logDate = log.date.split('T')[0];
-        
         if (logDate === today) {
             if (log.type === 'stappen') stepsToday += log.value;
             if (log.type === 'calorieen') calsToday += log.value;
         }
-        
         if (log.type === 'workout') {
-            workoutsWeek++; // Versimpeld: telt nu alle workouts in logs
+            workoutsWeek++;
         }
     });
 
-    // Laatste gewicht zoeken
     const weightLogs = logs.filter(l => l.type === 'gewicht').sort((a,b) => b.id - a.id);
     if (weightLogs.length > 0) weightLatest = weightLogs[0].value;
 
-    // DOM updaten met null-guards
     if (document.getElementById('stat-steps')) document.getElementById('stat-steps').textContent = stepsToday;
     if (document.getElementById('stat-calories')) document.getElementById('stat-calories').textContent = calsToday;
     if (document.getElementById('stat-workouts')) document.getElementById('stat-workouts').textContent = workoutsWeek;
@@ -263,14 +241,11 @@ function renderChart() {
     const metric = document.getElementById('chart-metric-select')?.value || 'weight';
     if (!svg) return;
 
-    // Filter logs op basis van de dropdown ('gewicht', 'stappen', 'calorieen')
     let typeFilter = 'gewicht';
     if(metric === 'steps') typeFilter = 'stappen';
     if(metric === 'calories') typeFilter = 'calorieen';
 
     const data = logs.filter(l => l.type === typeFilter).sort((a,b) => a.id - b.id);
-    
-    // Leeg SVG
     svg.innerHTML = '';
     
     if (data.length < 2) {
@@ -278,12 +253,10 @@ function renderChart() {
         return;
     }
 
-    // Update current value UI
     if(document.getElementById('chart-current-value')) {
         document.getElementById('chart-current-value').textContent = data[data.length-1].value;
     }
 
-    // Simpele berekening voor SVG path (X/Y coordinaten)
     const values = data.map(d => d.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -292,19 +265,20 @@ function renderChart() {
     let pathD = "";
     data.forEach((point, i) => {
         const x = (i / (data.length - 1)) * 300;
-        const y = 120 - (((point.value - min) / range) * 100) - 10; // padding
+        const y = 120 - (((point.value - min) / range) * 100) - 10;
         
         if (i === 0) pathD += `M ${x} ${y} `;
         else pathD += `L ${x} ${y} `;
         
-        // Teken een cirkel
         svg.innerHTML += `<circle cx="${x}" cy="${y}" r="4" fill="#CCFF00" />`;
     });
 
     svg.innerHTML = `<path d="${pathD}" fill="none" stroke="#CCFF00" stroke-width="2" />` + svg.innerHTML;
 }
 
-
+// ==========================================
+// 7. TAAL & INSTELLINGEN
+// ==========================================
 function setupLanguage() {
     const toggleBtn = document.getElementById('lang-toggle');
     if (!toggleBtn) return;
@@ -324,7 +298,7 @@ function updateLanguageUI() {
     
     elements.forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (dict[key]) {
+        if (dict && dict[key]) {
             el.textContent = dict[key];
         }
     });
@@ -334,7 +308,7 @@ function setupSettings() {
     const clearBtn = document.getElementById('clear-data-btn');
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            if (confirm("Weet je zeker dat je alle data wilt wissen? Dit kan niet ongedaan worden gemaakt.")) {
+            if (confirm("Weet je zeker dat je alle data wilt wissen?")) {
                 localStorage.removeItem('gymlock_logs');
                 logs = [];
                 updateDashboard();
