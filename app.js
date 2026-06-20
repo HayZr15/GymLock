@@ -1,18 +1,15 @@
-// --- PWA SERVICE WORKER REGISTRATIE ---
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('GymLock Service Worker succesvol geregistreerd!', reg.scope))
-            .catch(err => console.log('Service Worker registratie mislukt: ', err));
+            .then(reg => console.log('GymLock SW registered', reg.scope))
+            .catch(err => console.log('SW registration failed', err));
     });
 }
 
-// --- STATE MANAGEMENT & LOCALSTORAGE ---
 let logs = JSON.parse(localStorage.getItem('gymlock_logs')) || [];
 let currentLang = localStorage.getItem('gymlock_lang') || 'nl';
 let editLogId = null;
 
-// --- MULTILANGUAGE DICTIONARY (NL/EN) ---
 const I18N = {
     nl: {
         lang_btn: "EN",
@@ -51,18 +48,20 @@ const I18N = {
         nav_dashboard: "DASHBOARD",
         nav_logs: "LOGS",
         nav_settings: "INSTELLINGEN",
-        
-        // Dynamische JS elementen
+        filter_all: "Alles tonen",
+        filter_day: "Vandaag",
+        filter_week: "Deze week",
+        filter_month: "Deze maand",
         placeholders: { steps: "Bijv. 10000", calories: "Bijv. 2450", weight: "Bijv. 79.5", strength: "Bijv. 80", cardio: "Bijv. 45" },
-        valueLabels: { steps: "Aantal stappen", calories: "Aantal verbrande / binnengekomen calorieën (kcal)", weight: "Huidig gewicht (kg)", strength: "Gewicht gebruikt (kg)", cardio: "Duur (minuten)" },
-        subPlaceholders: { steps: "Bijv. Ochtendwandeling, hardlopen (optioneel)", calories: "Bijv. Ontbijt, avondeten (optioneel)", weight: "Bijv. Ochtend nuchter (optioneel)", strength: "Bijv. Bench Press, Squat", cardio: "Bijv. Hardlopen, Fietsen" },
-        subLabels: { steps: "Specifieke activiteit / Context", calories: "Welke maaltijd / Context?", weight: "Meetmoment / Context", strength: "Welke oefening?", cardio: "Welke activiteit?" },
+        valueLabels: { steps: "Aantal stappen", calories: "Aantal (kcal)", weight: "Gewicht (kg)", strength: "Gewicht (kg)", cardio: "Duur (minuten)" },
+        subPlaceholders: { steps: "Bijv. Ochtendwandeling", calories: "Bijv. Ontbijt", weight: "Bijv. Ochtend nuchter", strength: "Bijv. Bench Press", cardio: "Bijv. Hardlopen" },
+        subLabels: { steps: "Context", calories: "Welke maaltijd?", weight: "Meetmoment", strength: "Welke oefening?", cardio: "Welke activiteit?" },
         chartTitles: { weight: "PROGRESS CHART — WEIGHT TRACKER", steps: "PROGRESS CHART — STEPS TRACKER", calories: "PROGRESS CHART — CALORIES TRACKER" },
         units: { weight: " kg", calories: " kcal", steps: " stappen", strength: " kg", cardio: " min" },
         historyEmpty: "Nog geen logs aanwezig.",
         confirmDelete: "Weet je zeker dat je deze log wilt verwijderen?",
-        confirmClear: "Weet je het 100% zeker? Dit wist je volledige geschiedenis permanent.",
-        clearSuccess: "Alle data is succesvol gewist.",
+        confirmClear: "Weet je het 100% zeker? Dit wist alles permanent.",
+        clearSuccess: "Alle data is gewist.",
         addTitle: 'Add <span style="color: #CCFF00;">Log</span>',
         editTitle: 'Edit <span style="color: #CCFF00;">Log</span>',
         btnSave: "LOG OPSLAAN",
@@ -98,7 +97,7 @@ const I18N = {
         label_intensity: "Intensity / Difficulty",
         opt_light: "🟢 Light (RPE 6-7 / Recovery)",
         opt_medium: "🟡 Medium (RPE 8 / Working Set)",
-        opt_heavy: "🔴 Heavy (RPE 9-10 / Failure or PR)",
+        opt_heavy: "🔴 Heavy (RPE 9-10 / Failure)",
         label_date: "Activity Date",
         history_title: "Log History",
         settings_header: "Settings",
@@ -107,18 +106,20 @@ const I18N = {
         nav_dashboard: "DASHBOARD",
         nav_logs: "LOGS",
         nav_settings: "SETTINGS",
-        
-        // Dynamische JS elementen
+        filter_all: "Show all",
+        filter_day: "Today",
+        filter_week: "This week",
+        filter_month: "This month",
         placeholders: { steps: "E.g. 10000", calories: "E.g. 2450", weight: "E.g. 79.5", strength: "E.g. 80", cardio: "E.g. 45" },
-        valueLabels: { steps: "Number of steps", calories: "Calories burned / consumed (kcal)", weight: "Current weight (kg)", strength: "Weight used (kg)", cardio: "Duration (minutes)" },
-        subPlaceholders: { steps: "E.g. Morning walk, running (optional)", calories: "E.g. Breakfast, dinner (optional)", weight: "E.g. Morning fasted (optional)", strength: "E.g. Bench Press, Squat", cardio: "E.g. Running, Cycling" },
-        subLabels: { steps: "Specific activity / Context", calories: "Which meal / Context?", weight: "Measurement moment / Context", strength: "Which exercise?", cardio: "Which activity?" },
+        valueLabels: { steps: "Number of steps", calories: "Calories (kcal)", weight: "Weight (kg)", strength: "Weight (kg)", cardio: "Duration (minutes)" },
+        subPlaceholders: { steps: "E.g. Morning walk", calories: "E.g. Breakfast", weight: "E.g. Fasted", strength: "E.g. Bench Press", cardio: "E.g. Running" },
+        subLabels: { steps: "Context", calories: "Which meal?", weight: "Context", strength: "Exercise?", cardio: "Activity?" },
         chartTitles: { weight: "PROGRESS CHART — WEIGHT TRACKER", steps: "PROGRESS CHART — STEPS TRACKER", calories: "PROGRESS CHART — CALORIES TRACKER" },
         units: { weight: " kg", calories: " kcal", steps: " steps", strength: " kg", cardio: " min" },
         historyEmpty: "No logs registered yet.",
-        confirmDelete: "Are you sure you want to delete this log?",
-        confirmClear: "Are you 100% sure? This will wipe your entire history permanently.",
-        clearSuccess: "All data successfully cleared.",
+        confirmDelete: "Delete this log?",
+        confirmClear: "Are you 100% sure?",
+        clearSuccess: "All data cleared.",
         addTitle: 'Add <span style="color: #CCFF00;">Log</span>',
         editTitle: 'Edit <span style="color: #CCFF00;">Log</span>',
         btnSave: "SAVE LOG",
@@ -130,7 +131,7 @@ const I18N = {
 
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("log-date");
-    dateInput.value = new Date().toISOString().split('T')[0];
+    if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
     setupNavigation();
     setupLoggingForm();
@@ -138,30 +139,30 @@ document.addEventListener("DOMContentLoaded", () => {
     setupChartToggle();
     setupSettings();
     setupLanguageToggle();
+    setupFilterListener();
     
-    // Initiële render ronde
     updateLanguageUI();
     updateDashboardStats();
     renderHistory();
     renderChart();
 });
 
-// --- TAAL INTERFACE UPDATE ENGINE ---
 function setupLanguageToggle() {
     const langBtn = document.getElementById("lang-toggle");
+    if(!langBtn) return;
+    
     langBtn.addEventListener("click", () => {
         currentLang = currentLang === 'nl' ? 'en' : 'nl';
         localStorage.setItem('gymlock_lang', currentLang);
         
         updateLanguageUI();
-        setupDynamicPlaceholders(); // Ververst placeholders direct naar juiste taal
-        renderHistory();            // Vertaalt eenheden in de geschiedenis direct
-        renderChart();              // Vertaalt de assen en titels van de grafiek direct
+        setupDynamicPlaceholders(); 
+        renderHistory();            
+        renderChart();              
     });
 }
 
 function updateLanguageUI() {
-    // Loop door alle HTML elementen met data-i18n kenmerk
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (I18N[currentLang] && I18N[currentLang][key]) {
@@ -169,22 +170,22 @@ function updateLanguageUI() {
         }
     });
 
-    // Update de taal-badge/knop tekst zelf
-    document.getElementById("lang-toggle").textContent = I18N[currentLang].lang_btn;
+    const langToggle = document.getElementById("lang-toggle");
+    if(langToggle) langToggle.textContent = I18N[currentLang].lang_btn;
     
-    // Update de formuliertitels en knoppen dynamisch op basis van add/edit mode
     const submitBtn = document.getElementById("submit-btn");
     const cancelBtn = document.getElementById("cancel-edit-btn");
     const formTitle = document.getElementById("form-title");
     
-    if (editLogId !== null) {
+    if (editLogId !== null && formTitle && submitBtn) {
         formTitle.innerHTML = I18N[currentLang].editTitle;
         submitBtn.textContent = I18N[currentLang].btnEdit;
-    } else {
+    } else if (formTitle && submitBtn) {
         formTitle.innerHTML = I18N[currentLang].addTitle;
         submitBtn.textContent = I18N[currentLang].btnSave;
     }
-    cancelBtn.textContent = I18N[currentLang].btnCancel;
+    
+    if(cancelBtn) cancelBtn.textContent = I18N[currentLang].btnCancel;
 }
 
 function setupNavigation() {
@@ -212,16 +213,16 @@ function setupNavigation() {
     });
 }
 
-// --- DYNAMISCHE PLACEHOLDERS & INTENSITEIT LOGICA ---
 function setupDynamicPlaceholders() {
     const typeSelect = document.getElementById("log-type");
     const valueInput = document.getElementById("log-value");
     const valueLabel = document.getElementById("value-label");
-    
     const subGroup = document.getElementById("sub-activity-group");
     const subLabel = document.getElementById("sub-activity-label");
     const subInput = document.getElementById("log-sub-activity");
     const intensityGroup = document.getElementById("intensity-group");
+
+    if(!typeSelect || !valueInput) return;
 
     const selectedType = typeSelect.value;
     const langData = I18N[currentLang];
@@ -243,12 +244,17 @@ function setupDynamicPlaceholders() {
 }
 
 function setupChartToggle() {
-    document.getElementById("chart-metric-select").addEventListener("change", () => {
-        renderChart();
-    });
+    const select = document.getElementById("chart-metric-select");
+    if(select) select.addEventListener("change", renderChart);
 }
 
-// --- FORMULIERAFHANDELING ---
+function setupFilterListener() {
+    const filterSelect = document.getElementById("history-filter");
+    if(filterSelect) {
+        filterSelect.addEventListener("change", renderHistory);
+    }
+}
+
 function setupLoggingForm() {
     const form = document.getElementById("log-form");
     const typeSelect = document.getElementById("log-type");
@@ -257,6 +263,8 @@ function setupLoggingForm() {
     const subInput = document.getElementById("log-sub-activity");
     const intensitySelect = document.getElementById("log-intensity");
     const cancelBtn = document.getElementById("cancel-edit-btn");
+
+    if(!form) return;
 
     typeSelect.addEventListener("change", setupDynamicPlaceholders);
 
@@ -299,7 +307,9 @@ function setupLoggingForm() {
         form.reset();
         dateInput.value = new Date().toISOString().split('T')[0];
         setupDynamicPlaceholders();
-        document.querySelector('[data-screen="screen-dashboard"]').click();
+        
+        const dashBtn = document.querySelector('[data-screen="screen-dashboard"]');
+        if(dashBtn) dashBtn.click();
     });
 
     cancelBtn.addEventListener("click", () => {
@@ -312,24 +322,21 @@ function setupLoggingForm() {
     });
 }
 
-// --- DASHBOARD WIDGET BEREKENINGEN ---
 function updateDashboardStats() {
     const todayStr = new Date().toISOString().split('T')[0];
-    const langData = I18N[currentLang];
 
-    // 1. Steps vandaag
     const todaySteps = logs
         .filter(l => l.type === 'steps' && l.date === todayStr)
         .reduce((sum, l) => sum + l.value, 0);
-    document.getElementById("stat-steps").textContent = todaySteps > 0 ? todaySteps.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
+    const stepsEl = document.getElementById("stat-steps");
+    if(stepsEl) stepsEl.textContent = todaySteps > 0 ? todaySteps.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
 
-    // 2. Calories vandaag
     const todayCalories = logs
         .filter(l => l.type === 'calories' && l.date === todayStr)
         .reduce((sum, l) => sum + l.value, 0);
-    document.getElementById("stat-calories").textContent = todayCalories > 0 ? todayCalories.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
+    const calEl = document.getElementById("stat-calories");
+    if(calEl) calEl.textContent = todayCalories > 0 ? todayCalories.toLocaleString(currentLang === 'nl' ? 'nl-NL' : 'en-US') : "0";
 
-    // 3. Workouts deze week
     const now = new Date();
     const currentDay = now.getDay();
     const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
@@ -342,23 +349,29 @@ function updateDashboardStats() {
         const logDate = new Date(l.date);
         return logDate >= monday;
     }).length;
-    document.getElementById("stat-workouts").textContent = weekWorkouts;
+    const wOutEl = document.getElementById("stat-workouts");
+    if(wOutEl) wOutEl.textContent = weekWorkouts;
 
-    // 4. Weight laatste log
     const weightLogs = logs.filter(l => l.type === 'weight');
-    if (weightLogs.length > 0) {
-        weightLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
-        document.getElementById("stat-weight").textContent = weightLogs[0].value + " kg";
-    } else {
-        document.getElementById("stat-weight").textContent = "--";
+    const wEl = document.getElementById("stat-weight");
+    if(wEl) {
+        if (weightLogs.length > 0) {
+            weightLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            wEl.textContent = weightLogs[0].value + " kg";
+        } else {
+            wEl.textContent = "--";
+        }
     }
 }
 
-// --- INTERACTIEVE SVG GRAFIEK ENGINE ---
 function renderChart() {
-    const metric = document.getElementById("chart-metric-select").value;
+    const metricSelect = document.getElementById("chart-metric-select");
     const svg = document.getElementById("dynamic-svg");
     const tooltip = document.getElementById("chart-tooltip");
+    
+    if(!metricSelect || !svg) return;
+    
+    const metric = metricSelect.value;
     const langData = I18N[currentLang];
     
     svg.innerHTML = "";
@@ -366,7 +379,8 @@ function renderChart() {
     let chartLogs = logs.filter(l => l.type === metric);
     chartLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    document.getElementById("chart-title-text").textContent = langData.chartTitles[metric];
+    const titleEl = document.getElementById("chart-title-text");
+    if(titleEl) titleEl.textContent = langData.chartTitles[metric];
 
     if (chartLogs.length === 0) {
         svg.innerHTML = `<text x="150" y="65" fill="#434347" font-size="11" font-weight="600" text-anchor="middle">Geen data / No data found.</text>`;
@@ -392,7 +406,6 @@ function renderChart() {
         document.getElementById("chart-diff-value").style.color = "#71717A";
     }
 
-    // Viewbox schaling berekeningen (300x120)
     const paddingLeft = 45, paddingRight = 20, paddingTop = 15, paddingBottom = 20;
     const width = 300 - paddingLeft - paddingRight;
     const height = 120 - paddingTop - paddingBottom;
@@ -416,7 +429,6 @@ function renderChart() {
         return { x, y, log };
     });
 
-    // Teken Y-as Grid
     const axisLabels = [maxY, (maxY + minY) / 2, minY];
     const axisYPos = [paddingTop, paddingTop + height / 2, paddingTop + height];
     axisLabels.forEach((label, i) => {
@@ -428,7 +440,6 @@ function renderChart() {
         svg.appendChild(txt);
     });
 
-    // Teken Grafieklijn
     let d = `M ${points[0].x} ${points[0].y}`;
     for (let i = 1; i < points.length; i++) { d += ` L ${points[i].x} ${points[i].y}`; }
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -439,7 +450,6 @@ function renderChart() {
     path.setAttribute("stroke-linecap", "round");
     svg.appendChild(path);
 
-    // Teken Data-stipjes + Figma Tooltip logica
     points.forEach(pt => {
         const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("cx", pt.x);
@@ -447,28 +457,32 @@ function renderChart() {
         circle.setAttribute("r", "3.5");
         circle.setAttribute("fill", "#CCFF00");
 
-        circle.addEventListener("mouseover", () => {
-            const dateObj = new Date(pt.log.date);
-            const formattedDate = dateObj.toLocaleDateString(currentLang === 'nl' ? 'nl-NL' : 'en-US', { day: 'numeric', month: 'short' });
-            const contextText = pt.log.subActivity ? `<br><span style="color:#71717A; font-size:10px;">${pt.log.subActivity}</span>` : "";
+        if(tooltip) {
+            circle.addEventListener("mouseover", () => {
+                const dateObj = new Date(pt.log.date);
+                const formattedDate = dateObj.toLocaleDateString(currentLang === 'nl' ? 'nl-NL' : 'en-US', { day: 'numeric', month: 'short' });
+                const contextText = pt.log.subActivity ? `<br><span style="color:#71717A; font-size:10px;">${pt.log.subActivity}</span>` : "";
 
-            tooltip.innerHTML = `<strong>${pt.log.value.toLocaleString(numLocale)} ${unit}</strong><br><span style="color:#A1A1AA; font-size:10px;">${formattedDate}</span>${contextText}`;
-            tooltip.style.display = "block";
+                tooltip.innerHTML = `<strong>${pt.log.value.toLocaleString(numLocale)} ${unit}</strong><br><span style="color:#A1A1AA; font-size:10px;">${formattedDate}</span>${contextText}`;
+                tooltip.style.display = "block";
 
-            const containerRect = svg.parentElement.getBoundingClientRect();
-            const circleRect = circle.getBoundingClientRect();
-            tooltip.style.left = `${circleRect.left - containerRect.left + (circleRect.width / 2)}px`;
-            tooltip.style.top = `${circleRect.top - containerRect.top}px`;
-        });
+                const containerRect = svg.parentElement.getBoundingClientRect();
+                const circleRect = circle.getBoundingClientRect();
+                tooltip.style.left = `${circleRect.left - containerRect.left + (circleRect.width / 2)}px`;
+                tooltip.style.top = `${circleRect.top - containerRect.top}px`;
+            });
 
-        circle.addEventListener("mouseout", () => { tooltip.style.display = "none"; });
+            circle.addEventListener("mouseout", () => { tooltip.style.display = "none"; });
+        }
         svg.appendChild(circle);
     });
 }
 
-// --- HISTORY LOG CONSOLE RENDERING ---
 function renderHistory() {
     const container = document.getElementById("history-container");
+    const filterSelect = document.getElementById("history-filter");
+    if(!container) return;
+
     const langData = I18N[currentLang];
     container.innerHTML = "";
 
@@ -477,7 +491,39 @@ function renderHistory() {
         return;
     }
 
-    const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+    const filterVal = filterSelect ? filterSelect.value : 'all';
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    // Filter logica
+    let filteredLogs = logs.filter(log => {
+        if (filterVal === 'all') return true;
+        
+        if (filterVal === 'day') {
+            return log.date === todayStr;
+        }
+        
+        if (filterVal === 'week') {
+            const logDate = new Date(log.date);
+            const diffTime = Math.abs(now - logDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= 7;
+        }
+        
+        if (filterVal === 'month') {
+            const logDate = new Date(log.date);
+            return logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();
+        }
+        
+        return true;
+    });
+
+    if (filteredLogs.length === 0) {
+        container.innerHTML = `<p style="color: #434347; text-align: center; padding: 20px; font-size: 13px;">Geen logs in deze periode.</p>`;
+        return;
+    }
+
+    const sortedLogs = [...filteredLogs].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
     const numLocale = currentLang === 'nl' ? 'nl-NL' : 'en-US';
 
     sortedLogs.forEach(log => {
@@ -524,7 +570,8 @@ window.deleteLog = function(id) {
         if (editLogId === id) {
             editLogId = null;
             document.getElementById("log-form").reset();
-            document.getElementById("log-type").disabled = false;
+            const ts = document.getElementById("log-type");
+            if(ts) ts.disabled = false;
         }
         saveToLocalStorage();
         updateLanguageUI();
@@ -557,16 +604,19 @@ window.editLog = function(id) {
 };
 
 function setupSettings() {
-    document.getElementById("clear-data-btn").addEventListener("click", () => {
-        if (confirm(I18N[currentLang].confirmClear)) {
-            logs = [];
-            saveToLocalStorage();
-            updateDashboardStats();
-            renderHistory();
-            renderChart();
-            alert(I18N[currentLang].clearSuccess);
-        }
-    });
+    const clrBtn = document.getElementById("clear-data-btn");
+    if(clrBtn) {
+        clrBtn.addEventListener("click", () => {
+            if (confirm(I18N[currentLang].confirmClear)) {
+                logs = [];
+                saveToLocalStorage();
+                updateDashboardStats();
+                renderHistory();
+                renderChart();
+                alert(I18N[currentLang].clearSuccess);
+            }
+        });
+    }
 }
 
 function saveToLocalStorage() {

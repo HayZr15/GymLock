@@ -121,7 +121,7 @@
 
                 <div class="input-group" id="sub-activity-group">
                     <label id="sub-activity-label" for="log-sub-activity">Specifieke activiteit / Context</label>
-                    <input type="text" id="log-sub-activity" placeholder="Voer activiteit of context in" title="Specifieke activiteit of context invoeren">
+                    <input type="text" id="log-sub-activity" placeholder="Voer activiteit of context in">
                 </div>
 
                 <div class="input-group" id="intensity-group" style="display: none;">
@@ -134,13 +134,13 @@
                 </div>
 
                 <div class="input-group">
-                    <label data-i18n="label_date">Datum van activiteit</label>
-                    <input type="date" id="log-date" required title="Selecteer datum van activiteit" placeholder="YYYY-MM-DD">
+                    <label for="log-date" data-i18n="label_date">Datum van activiteit</label>
+                    <input type="date" id="log-date" required title="Datum van activiteit" placeholder="Selecteer datum">
                 </div>
 
                 <div class="input-group">
                     <label id="value-label" data-i18n="label_value">Aantal stappen</label>
-                    <input type="number" id="log-value" step="any" required aria-labelledby="value-label" title="Aantal stappen of waarde invoeren" placeholder="Voer aantal / waarde in">
+                    <input type="number" id="log-value" step="any" required placeholder="Voer aantal / waarde in">
                 </div>
 
                 <button type="submit" id="submit-btn" class="submit-btn">LOG OPSLAAN</button>
@@ -148,7 +148,15 @@
             </form>
 
             <div class="history-section">
-                <h3 data-i18n="history_title">Loggeschiedenis</h3>
+                <div class="history-header">
+                    <h3 data-i18n="history_title">Loggeschiedenis</h3>
+                    <select id="history-filter" class="chart-select">
+                        <option value="all" data-i18n="filter_all">Alles tonen</option>
+                        <option value="day" data-i18n="filter_day">Vandaag</option>
+                        <option value="week" data-i18n="filter_week">Deze week</option>
+                        <option value="month" data-i18n="filter_month">Deze maand</option>
+                    </select>
+                </div>
                 <div id="history-container"></div>
             </div>
         </div>

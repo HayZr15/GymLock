@@ -372,6 +372,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-bottom: 12px;
 }
 
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.history-header h3 {
+    font-size: 14px;
+    color: #71717A;
+    margin-bottom: 0; /* Override de oude margin */
+}
+
 .history-card {
     background: #141416;
     padding: 16px;
